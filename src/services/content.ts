@@ -59,7 +59,7 @@ export function getMainNavigation(): NavItem[] {
 
 export function getFooterShopLinks(): NavItem[] {
   return [
-    { label: 'All products', to: '/shop' },
+    { label: 'Full catalogue', to: '/shop' },
     ...getCategories()
       .filter((category) => category.active)
       .map((category) => ({ label: category.name, to: `/categories/${category.slug}` })),

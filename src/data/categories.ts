@@ -5,8 +5,8 @@ export const categories: ProductCategory[] = [
   {
     id: 'cat_vials',
     slug: 'sample-vials',
-    name: 'Sample Vials',
-    description: 'Individual sample vials from the catalogue.',
+    name: 'Vials',
+    description: 'Individual vial records from the catalogue.',
     imagePath: '/images/categories/sample-vials.jpg',
     imageLabel: 'Category Image',
     displayOrder: 1,
@@ -16,8 +16,8 @@ export const categories: ProductCategory[] = [
   {
     id: 'cat_reference',
     slug: 'reference-materials',
-    name: 'Reference Materials',
-    description: 'Reference-material records. No technical specifications are included.',
+    name: 'Reference',
+    description: 'Reference records kept beside the vial lots.',
     imagePath: '/images/categories/reference-materials.jpg',
     imageLabel: 'Category Image',
     displayOrder: 2,
@@ -27,8 +27,8 @@ export const categories: ProductCategory[] = [
   {
     id: 'cat_kits',
     slug: 'sample-kits',
-    name: 'Sample Kits',
-    description: 'Kit and collection records from the sample catalogue.',
+    name: 'Kits',
+    description: 'Kit and collection records from the catalogue.',
     imagePath: '/images/categories/sample-kits.jpg',
     imageLabel: 'Category Image',
     displayOrder: 3,

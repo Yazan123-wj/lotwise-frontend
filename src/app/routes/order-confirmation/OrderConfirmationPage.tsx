@@ -48,6 +48,7 @@ export function OrderConfirmationPage() {
               ))}
             </ul>
             <p className="mt-3 text-sm">Provisional total {formatMoney(receipt.provisionalTotal)} · sample prices, shipping excluded</p>
+            {receipt.referralCode ? <p className="mt-2 text-sm">Referral code {receipt.referralCode}</p> : null}
           </section>
           <section className="border border-wire-line bg-white p-4 text-sm">
             <h2 className="font-bold">Shipping information</h2>

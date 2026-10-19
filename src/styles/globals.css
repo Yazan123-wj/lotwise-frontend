@@ -34,8 +34,41 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-Semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --color-navy: #02092e;
   --color-royal: #1527be;
   --color-brand-sky: #63a0e4;
@@ -79,6 +112,13 @@
   input[type="radio"] {
     accent-color: var(--color-royal);
   }
+
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+  }
 }
 
 @keyframes lotwise-rise {
@@ -109,6 +149,26 @@
   animation: lotwise-sweep 1.15s ease-in-out infinite;
 }
 
+.catalog-panel {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 85% 0%, rgba(99, 160, 228, 0.28), transparent 42%),
+    linear-gradient(165deg, #0c1a52 0%, #02092e 58%);
+}
+
+.catalog-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 82%);
+  pointer-events: none;
+}
+
 .catalogue-tag {
   position: absolute;
   top: 0.7rem;
@@ -129,6 +189,25 @@
   text-transform: uppercase;
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 14px rgba(2, 9, 46, 0.08);
+}
+
+.marquee-track {
+  animation: lotwise-marquee 36s linear infinite;
+}
+
+@keyframes lotwise-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
 }
 
 .catalogue-tag::before {

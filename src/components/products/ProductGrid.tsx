@@ -1,27 +1,14 @@
-import { ProductCard } from '@/components/products/ProductCard'
+import { CatalogRecord } from '@/components/products/CatalogRecord'
 import type { Product } from '@/types'
-import { cx } from '@/utils/cx'
 
-export function ProductGrid({
-  products,
-  className,
-  columns = 3,
-}: {
-  products: Product[]
-  className?: string
-  columns?: 3 | 5
-}) {
+export function ProductGrid({ products }: { products: Product[] }) {
+  if (products.length === 0) return null
+
   return (
-    <ul
-      className={cx(
-        'grid grid-cols-1 gap-5 sm:grid-cols-2',
-        columns === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-3',
-        className,
-      )}
-    >
+    <ul className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
       {products.map((product) => (
         <li key={product.id}>
-          <ProductCard product={product} />
+          <CatalogRecord product={product} />
         </li>
       ))}
     </ul>

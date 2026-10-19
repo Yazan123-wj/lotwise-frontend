@@ -16,7 +16,7 @@ export function ProductFilters({
   onAvailability: (value: AvailabilityFilter) => void
 }) {
   return (
-    <div className="space-y-6 border border-wire-line bg-white p-4">
+    <div className="space-y-6 rounded-2xl border border-wire-line bg-white p-4">
       {showCategories ? (
         <fieldset>
           <legend className="text-sm font-medium">Categories</legend>
@@ -39,7 +39,7 @@ export function ProductFilters({
         <div className="mt-2 space-y-2">
           {(
             [
-              ['all', 'All sample items'],
+              ['all', 'All records'],
               ['in-stock', 'In stock'],
               ['out-of-stock', 'Out of stock'],
             ] as const

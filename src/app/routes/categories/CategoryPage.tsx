@@ -1,10 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
+import { CatalogHero } from '@/components/home/CatalogHero'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { CatalogueBrowser } from '@/components/products/CatalogueBrowser'
-import { CatalogueImage } from '@/components/ui/CatalogueImage'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { getCategory } from '@/services/catalog'
+import { countForCategory, getCategory, getProductsForCategory } from '@/services/catalog'
 
 export function CategoryPage() {
   const { slug = '' } = useParams()
@@ -16,10 +16,10 @@ export function CategoryPage() {
       <PageContainer>
         <ErrorState
           title="Category not found"
-          description="That sample category is not in the wireframe."
+          description="That category is not in the catalogue."
           action={
             <Link to="/shop" className="underline-offset-2 hover:underline">
-              Back to the shop
+              Back to the catalog
             </Link>
           }
         />
@@ -32,17 +32,27 @@ export function CategoryPage() {
       heading={category.name}
       introduction={category.description}
       lockedCategorySlug={category.slug}
+      hideHeading
       breadcrumbs={[
         { label: 'Home', to: '/' },
-        { label: 'Shop', to: '/shop' },
+        { label: 'Catalog', to: '/shop' },
         { label: category.name },
       ]}
       banner={
-        category.imagePath ? (
-          <div className="min-w-0 overflow-hidden bg-[#eef3f8]">
-            <CatalogueImage className="aspect-[21/9] max-h-80" src={category.imagePath} alt="" />
-          </div>
-        ) : undefined
+        <CatalogHero
+          heading="h1"
+          eyebrow={`${countForCategory(category)} records`}
+          title="LotWise"
+          subtitle={category.name}
+          copy={category.description}
+          images={getProductsForCategory(category.slug)
+            .slice(0, 3)
+            .map((product) => product.imagePaths[0])}
+          figures={[
+            { label: 'Records', value: String(countForCategory(category)).padStart(2, '0') },
+            { label: 'Area', value: category.name },
+          ]}
+        />
       }
     />
   )

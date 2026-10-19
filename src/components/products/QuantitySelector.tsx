@@ -1,17 +1,21 @@
+import { cx } from '@/utils/cx'
+
 export function QuantitySelector({
   id,
   value,
   max,
   onChange,
+  className,
 }: {
   id: string
   value: number
   max: number
   onChange: (value: number) => void
+  className?: string
 }) {
   const disabled = max < 1
   return (
-    <div className="inline-flex items-center border border-wire-line bg-white">
+    <div className={cx('inline-flex items-center rounded-xl border border-wire-line bg-white', className)}>
       <button
         type="button"
         className="min-h-11 min-w-11"

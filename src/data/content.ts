@@ -7,7 +7,7 @@ export const brandPillars = [
   },
   {
     title: 'Quality',
-    copy: 'Quality documentation will be published here after review. This site does not state certifications or guarantees.',
+    copy: 'Document types are listed on the quality page. Certificate numbers and test results are not published here.',
   },
   {
     title: 'Transparency',

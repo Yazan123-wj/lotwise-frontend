@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { AccountGate } from '@/components/account/AccountGate'
 import { DemoNotice } from '@/components/feedback/DemoNotice'
 import { FormField } from '@/components/forms/FormField'
+import { ReferralLinkCard } from '@/components/referral/ReferralLinkCard'
 import { Button } from '@/components/ui/Button'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { getPreviewCustomer } from '@/services/commerce'
@@ -42,6 +43,9 @@ export function ProfilePage() {
         <Button type="submit">Save demonstration</Button>
         {saved ? <DemoNotice>The preview profile changed on this page only. It was not saved.</DemoNotice> : null}
       </form>
+      <div className="mt-8 max-w-xl">
+        <ReferralLinkCard />
+      </div>
     </AccountGate>
   )
 }

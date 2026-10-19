@@ -11,8 +11,8 @@ export function SortSelector({ value, onChange }: { value: SortOption; onChange:
       >
         <option value="featured">Featured</option>
         <option value="name-asc">Name, A to Z</option>
-        <option value="price-asc">Sample price, low to high</option>
-        <option value="price-desc">Sample price, high to low</option>
+        <option value="price-asc">Price, low to high</option>
+        <option value="price-desc">Price, high to low</option>
       </select>
     </label>
   )

@@ -14,6 +14,7 @@ import { useCart } from '@/hooks/useCart'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { saveDemoReceipt } from '@/services/commerce'
 import { getShippingMethods } from '@/services/content'
+import { getAppliedReferral } from '@/services/referral'
 import type { Address, DemoReceipt } from '@/types'
 import { emptyCheckout, validateCheckout, type CheckoutValues } from '@/utils/validation'
 
@@ -73,6 +74,7 @@ export function CheckoutPage() {
       subtotal: quote.subtotal,
       discountAmount: quote.discountAmount,
       discountCode: quote.discountCode,
+      referralCode: getAppliedReferral(),
       provisionalTotal: quote.provisionalTotal,
       paymentStatus: 'not-collected',
     }
@@ -91,6 +93,11 @@ export function CheckoutPage() {
         ]}
       />
       <h1 className="text-3xl font-bold">Checkout</h1>
+      {getAppliedReferral() ? (
+        <p className="rounded-2xl border border-wire-line bg-white px-4 py-3 text-sm text-navy">
+          Referral code {getAppliedReferral()} is attached to this checkout. It does not change the total.
+        </p>
+      ) : null}
       <DemoNotice>
         Guest checkout is part of this flow. Placing an order here creates a demonstration confirmation only. No payment is taken and no order is stored.
       </DemoNotice>

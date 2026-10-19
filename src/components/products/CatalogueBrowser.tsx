@@ -1,17 +1,12 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs'
-import { SearchBar } from '@/components/navigation/SearchBar'
-import { ProductFilters } from '@/components/products/ProductFilters'
+import { AreaPills } from '@/components/navigation/AreaPills'
 import { ProductGrid } from '@/components/products/ProductGrid'
-import { SortSelector } from '@/components/products/SortSelector'
 import { EmptyState } from '@/components/feedback/EmptyState'
-import { ErrorState } from '@/components/feedback/ErrorState'
-import { LoadingState } from '@/components/feedback/LoadingState'
 import { PageContainer } from '@/components/layout/PageContainer'
-import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
-import { CATALOGUE_PAGE_SIZE, getCategories, queryProducts } from '@/services/catalog'
+import { CATALOGUE_PAGE_SIZE, countForCategory, getCategories, getCategory, queryProducts, visibleProducts } from '@/services/catalog'
 import type { AvailabilityFilter, Crumb, SortOption } from '@/types'
 
 function parseSort(value: string | null): SortOption {
@@ -19,10 +14,7 @@ function parseSort(value: string | null): SortOption {
   return 'featured'
 }
 
-function parseAvailability(value: string | null): AvailabilityFilter {
-  if (value === 'in-stock' || value === 'out-of-stock') return value
-  return 'all'
-}
+const fieldClass = 'h-11 w-full rounded-full border border-wire-line bg-white px-4 text-sm text-navy'
 
 export function CatalogueBrowser({
   heading,
@@ -31,6 +23,7 @@ export function CatalogueBrowser({
   lockedCategorySlug,
   banner,
   requireQuery = false,
+  hideHeading = false,
 }: {
   heading: string
   introduction?: string
@@ -38,26 +31,44 @@ export function CatalogueBrowser({
   lockedCategorySlug?: string
   banner?: ReactNode
   requireQuery?: boolean
+  hideHeading?: boolean
 }) {
   const [params, setParams] = useSearchParams()
-  const [preview, setPreview] = useState<'ready' | 'loading' | 'error'>('ready')
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [draft, setDraft] = useState(params.get('q') ?? '')
+  const [syncedQuery, setSyncedQuery] = useState(params.get('q') ?? '')
   const text = params.get('q') ?? ''
+  if (syncedQuery !== text) {
+    setSyncedQuery(text)
+    setDraft(text)
+  }
   const sort = parseSort(params.get('sort'))
-  const availability = parseAvailability(params.get('availability'))
+  const kind = params.get('kind') === 'kit' || params.get('kind') === 'single' ? params.get('kind') : ''
+  const availability: AvailabilityFilter = 'all'
   const categoryKey = lockedCategorySlug ?? params.get('category') ?? ''
   const categorySlugs = useMemo(() => categoryKey.split(',').filter(Boolean), [categoryKey])
   const requestedPage = Number(params.get('page') ?? '1')
+  const catalogue = visibleProducts()
 
   const results = useMemo(() => {
     if (requireQuery && !text.trim()) return []
-    return queryProducts({ text, categorySlugs, availability, sort })
-  }, [availability, categorySlugs, requireQuery, sort, text])
+    return queryProducts({ text, categorySlugs, availability, sort }).filter((product) => {
+      if (kind === 'kit') return product.categorySlug === 'sample-kits'
+      if (kind === 'single') return product.categorySlug !== 'sample-kits'
+      return true
+    })
+  }, [availability, categorySlugs, kind, requireQuery, sort, text])
 
   const pageCount = Math.max(1, Math.ceil(results.length / CATALOGUE_PAGE_SIZE))
   const page = Number.isInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, pageCount) : 1
   const visible = results.slice((page - 1) * CATALOGUE_PAGE_SIZE, page * CATALOGUE_PAGE_SIZE)
   const awaitingQuery = requireQuery && !text.trim()
+  const activeCategory = categorySlugs.length === 1 ? getCategory(categorySlugs[0]) : undefined
+  const sectionTitle = activeCategory?.name ?? heading
+  const sectionCopy = lockedCategorySlug ? undefined : (activeCategory?.description ?? introduction)
+  const singleCount = catalogue.filter((product) => product.categorySlug !== 'sample-kits').length
+  const kitCount = catalogue.length - singleCount
+  const filtersActive = Boolean(text || kind || sort !== 'featured' || (!lockedCategorySlug && categorySlugs.length > 0))
+  const Title = hideHeading ? 'h2' : 'h1'
 
   function update(patch: Record<string, string | null>, resetPage = true) {
     setParams((current) => {
@@ -71,91 +82,117 @@ export function CatalogueBrowser({
     })
   }
 
-  function toggleCategory(slug: string) {
-    const next = categorySlugs.includes(slug) ? categorySlugs.filter((item) => item !== slug) : [...categorySlugs, slug]
-    update({ category: next.join(',') || null })
-  }
-
   return (
-    <PageContainer className="space-y-6">
+    <PageContainer className="space-y-6 py-6 md:py-8">
       <Breadcrumbs items={breadcrumbs} />
-      <header className="space-y-2">
-        <h1 className="text-3xl font-medium tracking-tight text-navy sm:text-4xl">{heading}</h1>
-        {introduction ? <p className="max-w-2xl text-sm text-wire-muted">{introduction}</p> : null}
-      </header>
+      <AreaPills
+        activeSlug={lockedCategorySlug ?? (categorySlugs.length === 1 ? categorySlugs[0] : undefined)}
+        onSelect={lockedCategorySlug ? undefined : (slug) => update({ category: slug })}
+      />
       {banner}
-      <p className="text-sm">
-        {awaitingQuery ? 'No query submitted.' : `${results.length} sample product${results.length === 1 ? '' : 's'}`}
-      </p>
-      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <div className={filtersOpen ? 'block' : 'hidden lg:block'}>
-        <ProductFilters
-          categories={getCategories().filter((category) => category.active)}
-          selected={categorySlugs}
-          availability={availability}
-          showCategories={!lockedCategorySlug}
-          onToggleCategory={toggleCategory}
-          onAvailability={(value) => update({ availability: value === 'all' ? null : value })}
-        />
-        </div>
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 lg:hidden">
-            <Button variant="secondary" onClick={() => setFiltersOpen((current) => !current)} aria-expanded={filtersOpen}>
-              {filtersOpen ? 'Hide filters' : 'Filters'}
-            </Button>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="min-w-0 flex-1">
-              <SearchBar label={`Search ${heading}`} initialValue={text} onSearch={(query) => update({ q: query || null })} />
-            </div>
-            <SortSelector value={sort} onChange={(value) => update({ sort: value === 'featured' ? null : value })} />
-          </div>
-          {preview === 'loading' ? <LoadingState /> : null}
-          {preview === 'error' ? (
-            <ErrorState
-              title="Sample catalogue unavailable"
-              description="This is a preview of the error state. The sample data is still available."
-              action={
-                <Button variant="secondary" onClick={() => setPreview('ready')}>
-                  Show results
-                </Button>
-              }
-            />
-          ) : null}
-          {preview === 'ready' && awaitingQuery ? (
-            <EmptyState
-              title="Search the sample catalogue"
-              description="Enter a word from a placeholder name, such as vial, kit, or reference."
-            />
-          ) : null}
-          {preview === 'ready' && !awaitingQuery && results.length === 0 ? (
-            <EmptyState
-              title="No sample products match"
-              description="Clear a filter or try another word. The catalogue itself has not changed."
-            />
-          ) : null}
-          {preview === 'ready' && !awaitingQuery && results.length > 0 ? (
-            <>
-              <ProductGrid products={visible} />
-              <Pagination page={page} pageCount={pageCount} onPage={(next) => update({ page: String(next) }, false)} />
-            </>
-          ) : null}
-          <details className="text-sm text-wire-muted">
-            <summary className="cursor-pointer text-navy">Preview states</summary>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button variant="secondary" onClick={() => setPreview('ready')}>
-                Results
-              </Button>
-              <Button variant="secondary" onClick={() => setPreview('loading')}>
-                Loading
-              </Button>
-              <Button variant="secondary" onClick={() => setPreview('error')}>
-                Error
-              </Button>
-            </div>
-          </details>
-        </div>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <form
+          className="min-w-0 flex-1"
+          role="search"
+          onSubmit={(event) => {
+            event.preventDefault()
+            update({ q: draft.trim() || null })
+          }}
+        >
+          <label className="sr-only" htmlFor="catalog-search">
+            Search the catalog
+          </label>
+          <input
+            id="catalog-search"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder="Search the catalog"
+            className={fieldClass}
+          />
+        </form>
+        {lockedCategorySlug ? null : (
+          <label className="lg:w-48">
+            <span className="sr-only">Area</span>
+            <select
+              className={fieldClass}
+              value={categorySlugs[0] ?? ''}
+              onChange={(event) => update({ category: event.target.value || null })}
+            >
+              <option value="">Area: all</option>
+              {getCategories()
+                .filter((category) => category.active)
+                .map((category) => (
+                  <option key={category.id} value={category.slug}>
+                    {category.name} ({countForCategory(category)})
+                  </option>
+                ))}
+            </select>
+          </label>
+        )}
+        <label className="lg:w-52">
+          <span className="sr-only">Type</span>
+          <select className={fieldClass} value={kind ?? ''} onChange={(event) => update({ kind: event.target.value || null })}>
+            <option value="">Type: all</option>
+            <option value="single">Single record ({singleCount})</option>
+            <option value="kit">Kits ({kitCount})</option>
+          </select>
+        </label>
+        <label className="lg:w-56">
+          <span className="sr-only">Sort</span>
+          <select className={fieldClass} value={sort} onChange={(event) => update({ sort: event.target.value === 'featured' ? null : event.target.value })}>
+            <option value="featured">Sort: featured</option>
+            <option value="name-asc">Name A–Z</option>
+            <option value="price-asc">Price: low–high</option>
+            <option value="price-desc">Price: high–low</option>
+          </select>
+        </label>
       </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-wire-muted">
+        <p>{awaitingQuery ? 'Search the catalog' : `${results.length} of ${catalogue.length}`}</p>
+        {filtersActive ? (
+          <button
+            type="button"
+            className="text-sm text-navy underline-offset-4 hover:underline"
+            onClick={() => {
+              setDraft('')
+              update({
+                q: null,
+                kind: null,
+                sort: null,
+                category: lockedCategorySlug ? null : null,
+              })
+            }}
+          >
+            Clear filters
+          </button>
+        ) : null}
+      </div>
+      <header className="space-y-2">
+        <Title className="text-2xl font-medium tracking-tight text-navy sm:text-3xl">{sectionTitle}</Title>
+        {sectionCopy ? <p className="max-w-2xl text-sm leading-6 text-wire-muted">{sectionCopy}</p> : null}
+      </header>
+      {awaitingQuery ? <EmptyState title="Search the catalog" description="Try a record name, such as vial, kit, or reference." /> : null}
+      {!awaitingQuery && results.length === 0 ? (
+        <EmptyState title="No records match" description="Clear a filter or try another word." />
+      ) : null}
+      {!awaitingQuery && results.length > 0 ? (
+        <>
+          <ProductGrid products={visible} />
+          <Pagination page={page} pageCount={pageCount} onPage={(next) => update({ page: String(next) }, false)} />
+        </>
+      ) : null}
+      <section className="rounded-[1.75rem] bg-navy px-6 py-10 text-white sm:px-10">
+        <h2 className="text-2xl font-medium tracking-tight">Request the catalogue</h2>
+        <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
+          Share the records you want to review. Availability is confirmed with the account. This preview does not send the message to a server.
+        </p>
+        <Link
+          to="/contact"
+          className="mt-6 inline-flex min-h-11 items-center rounded-full bg-white px-5 text-sm font-medium text-navy hover:bg-brand-sky"
+        >
+          Contact
+        </Link>
+      </section>
     </PageContainer>
   )
 }

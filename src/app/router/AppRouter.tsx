@@ -41,6 +41,8 @@ import { NotFoundPage } from '@/app/routes/not-found/NotFoundPage'
 import { OrderConfirmationPage } from '@/app/routes/order-confirmation/OrderConfirmationPage'
 import { PolicyPage } from '@/app/routes/policies/PolicyPage'
 import { ProductPage } from '@/app/routes/products/ProductPage'
+import { QualityPage } from '@/app/routes/quality/QualityPage'
+import { ReferralPage } from '@/app/routes/referral/ReferralPage'
 import { SearchPage } from '@/app/routes/search/SearchPage'
 import { ShopPage } from '@/app/routes/shop/ShopPage'
 
@@ -101,6 +103,8 @@ export function AppRouter() {
             <Route path="orders" element={<AccountOrdersPage />} />
             <Route path="orders/:orderId" element={<AccountOrderDetailPage />} />
           </Route>
+          <Route path="quality" element={<QualityPage />} />
+          <Route path="referral" element={<ReferralPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="faq" element={<FaqPage />} />

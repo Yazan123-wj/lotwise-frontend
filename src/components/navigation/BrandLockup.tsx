@@ -4,7 +4,7 @@ export function BrandLockup({ tone = 'dark' }: { tone?: 'dark' | 'light' }) {
   if (tone === 'dark') {
     return (
       <Link to="/" className="inline-flex items-center" aria-label="LotWise Labs, home">
-        <img src="/brand/lotwise-logo.png" alt="" className="h-11 w-auto sm:h-[3.25rem]" />
+        <img src="/brand/lotwise-logo.png" alt="" className="h-9 w-auto sm:h-11 lg:h-[3.25rem]" />
       </Link>
     )
   }

@@ -130,6 +130,7 @@ export type DemoReceipt = {
   subtotal: number
   discountAmount: number
   discountCode: string | null
+  referralCode?: string | null
   provisionalTotal: number
   paymentStatus: 'not-collected'
 }

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" fill="none">
+  <rect width="900" height="640" fill="#f7f4ee"/>
+  <rect x="28" y="28" width="844" height="584" stroke="#02092E" stroke-width="2"/>
+  <rect x="40" y="40" width="820" height="560" stroke="#1527BE" stroke-width="1"/>
+  <text x="450" y="120" text-anchor="middle" fill="#1527BE" font-family="Georgia, serif" font-size="14" letter-spacing="6">LOTWISE LABS</text>
+  <text x="450" y="210" text-anchor="middle" fill="#02092E" font-family="Georgia, serif" font-size="42">Certificate of Analysis</text>
+  <line x1="310" y1="240" x2="590" y2="240" stroke="#63A0E4" stroke-width="1"/>
+  <text x="450" y="300" text-anchor="middle" fill="#02092E" font-family="Georgia, serif" font-size="18">Research catalogue</text>
+  <text x="450" y="340" text-anchor="middle" fill="#4c5a73" font-family="Georgia, serif" font-size="16">Document LW-COA</text>
+  <circle cx="450" cy="450" r="54" stroke="#1527BE" stroke-width="2"/>
+  <circle cx="450" cy="450" r="46" stroke="#63A0E4" stroke-width="1"/>
+  <text x="450" y="456" text-anchor="middle" fill="#02092E" font-family="Georgia, serif" font-size="18" letter-spacing="2">LW</text>
+  <text x="450" y="540" text-anchor="middle" fill="#4c5a73" font-family="Georgia, serif" font-size="13" letter-spacing="3">QUALITY FILE</text>
+</svg>

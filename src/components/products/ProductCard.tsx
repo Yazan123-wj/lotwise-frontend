@@ -12,9 +12,9 @@ export function ProductCard({ product }: { product: Product }) {
   const from = product.variations.length > 1
 
   return (
-    <article className="group flex h-full flex-col border border-wire-line bg-white transition duration-300 hover:-translate-y-0.5 hover:border-royal/40 hover:shadow-[0_18px_40px_rgba(2,9,46,0.08)]">
-      <div className="relative bg-[#eef3f8]">
-        <Link to={`/products/${product.slug}`} className="block min-w-0 overflow-hidden" tabIndex={-1} aria-hidden="true">
+    <article className="group flex h-full flex-col rounded-2xl border border-wire-line bg-white transition duration-300 hover:-translate-y-0.5 hover:border-royal/30 hover:shadow-[0_18px_40px_rgba(2,9,46,0.08)]">
+      <div className="relative overflow-hidden rounded-t-2xl bg-[#eef3f8]">
+        <Link to={`/products/${product.slug}`} className="block min-w-0" tabIndex={-1} aria-hidden="true">
           <CatalogueImage
             src={product.imagePaths[0]}
             alt=""
@@ -29,18 +29,18 @@ export function ProductCard({ product }: { product: Product }) {
             {product.name}
           </Link>
         </h3>
-        <p className="mt-2 line-clamp-2 flex-1 text-sm leading-6 text-wire-muted">{product.shortDescription}</p>
-        <p className="mt-4 text-base font-medium text-navy">
+        <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-wire-muted">{product.baseSku}</p>
+        <p className="mt-3 text-xs text-wire-muted">Research use only</p>
+        <p className="mt-3 text-base font-medium text-navy">
           {from ? <span className="mr-1 text-xs font-normal text-wire-muted">From</span> : null}
           {formatMoney(lowestPrice(product))}
         </p>
         <Button
-          size="lg"
-          className="mt-4 w-full"
+          className="mt-4 w-full rounded-full"
           disabled={!variation || variation.stockQuantity < 1}
           onClick={() => variation && addItem(product.id, variation.id, 1)}
         >
-          Add to cart
+          {variation && variation.stockQuantity > 0 ? 'Add to cart' : 'Out of stock'}
         </Button>
       </div>
     </article>

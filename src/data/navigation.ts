@@ -1,17 +1,21 @@
 import type { NavItem } from '@/types'
 
 export const primaryLinks: NavItem[] = [
-  { label: 'Shop', to: '/shop' },
+  { label: 'Catalog', to: '/shop' },
+  { label: 'Quality', to: '/quality' },
+  { label: 'Referral', to: '/account/profile' },
   { label: 'About', to: '/about' },
   { label: 'FAQ', to: '/faq' },
   { label: 'Contact', to: '/contact' },
 ]
 
 export const supportLinks: NavItem[] = [
+  { label: 'Quality', to: '/quality' },
+  { label: 'Referral', to: '/account/profile' },
+  { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
   { label: 'FAQ', to: '/faq' },
   { label: 'Account', to: '/account' },
-  { label: 'Cart', to: '/cart' },
 ]
 
 export const policyLinks: NavItem[] = [
