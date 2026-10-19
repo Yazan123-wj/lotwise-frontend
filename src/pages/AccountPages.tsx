@@ -1,5 +1,5 @@
-import { useState, type FormEvent, type ReactNode } from "react"
-import { Link, NavLink, Outlet, useNavigate, useParams } from "react-router-dom"
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
 import { previewCustomer, sampleAddress, sampleOrders } from "../data/content.ts"
 import SpecularButton from "../components/SpecularButton.tsx"
 import { formatDate, formatMoney } from "../lib/catalog.ts"
@@ -59,6 +59,17 @@ function Gate({ children }: { children: ReactNode }) {
 export function AccountLayout() {
   useTitle("Account")
   const session = useSession()
+  const { pathname } = useLocation()
+  const navRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const nav = navRef.current
+    const current = nav?.querySelector<HTMLElement>('[aria-current="page"]')
+    if (!nav || !current) return
+    const navBox = nav.getBoundingClientRect()
+    const item = current.getBoundingClientRect()
+    if (item.left < navBox.left) nav.scrollLeft -= navBox.left - item.left + 14
+    else if (item.right > navBox.right) nav.scrollLeft += item.right - navBox.right + 14
+  }, [pathname])
   return (
     <div className="wrap">
       <header className="page-hero">
@@ -67,7 +78,7 @@ export function AccountLayout() {
         {session.customer ? <p className="lede">{session.customer.email}</p> : null}
       </header>
       <div className="account">
-        <nav className="side-nav" aria-label="Account">
+        <nav className="side-nav" aria-label="Account" ref={navRef}>
           {links.map((link) => (
             <NavLink key={link.to} to={link.to} end={link.end}>{link.label}</NavLink>
           ))}

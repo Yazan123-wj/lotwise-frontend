@@ -92,6 +92,7 @@ export function StoreLayout() {
       if (event.key === "Escape") closeOverlay()
     }
     document.addEventListener("keydown", onKey)
+    if (open !== "cart") return () => document.removeEventListener("keydown", onKey)
     const previous = document.body.style.overflow
     document.body.style.overflow = "hidden"
     return () => {
@@ -124,7 +125,7 @@ export function StoreLayout() {
     setOpen(null)
   }
 
-  const results = query.trim() ? searchProducts(query).slice(0, 8) : visibleProducts().filter((item) => item.featured).slice(0, 5)
+  const results = query.trim() ? searchProducts(query).slice(0, 6) : []
 
   return (
     <div className={home ? "store-home" : "store"}>
@@ -148,10 +149,32 @@ export function StoreLayout() {
               if (next) setOpen(null)
             }}
             actions={
-              <>
-                <button className="icon-btn" type="button" aria-label="Search the catalogue" onClick={() => { setMenuOpen(false); setOpen("search") }}>
-                  <IconSearch />
-                </button>
+              <div className={open === "search" ? "nav-search-slot is-open" : "nav-search-slot"}>
+                {open === "search" ? (
+                  <label className="nav-search">
+                    <IconSearch />
+                    <input
+                      id={searchId}
+                      autoFocus
+                      value={query}
+                      placeholder="Search"
+                      aria-label="Search the catalogue"
+                      onChange={(event) => setQuery(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && results[0]) {
+                          navigate(`/products/${results[0].slug}`)
+                          setQuery("")
+                          setOpen(null)
+                        }
+                      }}
+                    />
+                    <button type="button" className="nav-search-close" aria-label="Close search" onClick={() => { setQuery(""); setOpen(null) }}>×</button>
+                  </label>
+                ) : (
+                  <button className="icon-btn" type="button" aria-label="Search the catalogue" onClick={() => { setMenuOpen(false); setOpen("search") }}>
+                    <IconSearch />
+                  </button>
+                )}
                 <Link className="icon-btn" to="/account" aria-label="Account" aria-current={location.pathname.startsWith("/account") ? "page" : undefined} onClick={() => setMenuOpen(false)}>
                   <IconProfile />
                 </Link>
@@ -160,7 +183,7 @@ export function StoreLayout() {
                   <span className="cart-label">Cart</span>
                   <span className="count">{cart.count}</span>
                 </button>
-              </>
+              </div>
             }
             items={[
               {
@@ -189,6 +212,19 @@ export function StoreLayout() {
               },
             ]}
           />
+          {open === "search" && query.trim() ? (
+            <div className="nav-search-drop">
+              {results.length === 0 ? <p className="meta">No matching records.</p> : results.map((product) => (
+                <Link key={product.id} to={`/products/${product.slug}`} onClick={() => { setQuery(""); setOpen(null) }}>
+                  <img src={product.imagePaths[0]} alt="" />
+                  <span>
+                    <strong>{product.name}</strong>
+                    <span className="meta">{product.baseSku} · {formatMoney(Math.min(...product.variations.map((item) => item.price)))}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : null}
         </header>
       </div>
 
@@ -254,47 +290,12 @@ export function StoreLayout() {
 
       <div className="dock" aria-label="Shortcuts">
         <button type="button" aria-expanded={menuOpen} onPointerDown={(event) => event.stopPropagation()} onClick={() => setMenuOpen((value) => !value)}>Menu</button>
-        <button type="button" onClick={() => setOpen("search")}>Search</button>
+        <button type="button" onClick={() => { setMenuOpen(false); setOpen("search") }}>Search</button>
         <Link to="/account">Account</Link>
         <button type="button" onClick={() => { setCartLeaving(false); setOpen("cart") }}>Cart <span className="dock-count">{cart.count}</span></button>
       </div>
 
-      {open === "search" ? (
-        <div className="overlay" role="dialog" aria-modal="true" aria-label="Search the catalogue">
-          <div className="overlay-bar wrap">
-            <label className="search-line" htmlFor={searchId}>
-              <IconSearch />
-              <input
-                id={searchId}
-                autoFocus
-                value={query}
-                placeholder="Search the catalogue"
-                onChange={(event) => setQuery(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    navigate(`/search?q=${encodeURIComponent(query.trim())}`)
-                    setOpen(null)
-                  }
-                }}
-              />
-            </label>
-            <SpecularButton tone="ghost" type="button" onClick={() => setOpen(null)}>Close</SpecularButton>
-          </div>
-          <div className="wrap search-results">
-            <p className="eyebrow">{query.trim() ? "Matches" : "Selected records"}</p>
-            {results.length === 0 ? <p>That record is not in the wireframe catalogue.</p> : results.map((product) => (
-              <Link key={product.id} to={`/products/${product.slug}`} onClick={() => setOpen(null)}>
-                <img src={product.imagePaths[0]} alt="" />
-                <span>
-                  <strong>{product.name}</strong>
-                  <span className="meta"> {product.baseSku} · {formatMoney(Math.min(...product.variations.map((item) => item.price)))}</span>
-                </span>
-              </Link>
-            ))}
-            <SpecularButton tone="primary" to={`/search?q=${encodeURIComponent(query.trim())}`} onClick={() => setOpen(null)}>Search page</SpecularButton>
-          </div>
-        </div>
-      ) : null}
+      {open === "search" ? <button className="search-backdrop" type="button" aria-label="Close search" onClick={() => { setQuery(""); setOpen(null) }} /> : null}
 
       {open === "cart" ? (
         <>
