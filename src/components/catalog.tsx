@@ -21,7 +21,7 @@ const pageSize = 8
 
 const areaBanners: Record<string, { photo?: string; cutout?: string }> = {
   catalog: { cutout: "/images/lotwise-vial.png" },
-  "sample-vials": { cutout: "/images/lotwise-vial.png" },
+  "sample-vials": { photo: "/images/banners/area-vials.jpg" },
   "reference-materials": { photo: "/images/banners/area-reference.jpg" },
   "sample-kits": { photo: "/images/banners/area-kits.jpg" },
 }

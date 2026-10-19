@@ -13,7 +13,7 @@ export const categories: Category[] = [
     slug: "sample-vials",
     name: "Vials",
     description: "Individual vial records from the catalogue.",
-    imagePath: "/images/lotwise-vial.png",
+    imagePath: "/images/banners/area-vials.jpg",
     displayOrder: 1,
     active: true,
     featured: true,

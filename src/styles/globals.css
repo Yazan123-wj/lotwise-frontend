@@ -333,10 +333,8 @@ h2 + .lede {
   background: var(--navy);
 }
 .area-stage img { width: 100%; height: 520px; object-fit: cover; }
-.area-stage img[src$="lotwise-vial.png"] {
-  object-fit: contain;
-  background: #e7ebf2;
-  padding: 48px;
+.area-stage img[src$="area-vials.jpg"] {
+  object-position: center 42%;
 }
 .area-stage div {
   position: absolute;
@@ -445,8 +443,11 @@ h2 + .lede {
 .catalog-banner[data-tone="catalog"] {
   background-image: linear-gradient(180deg, #f3f5f8 0%, #d5dee8 42%, #8b9eb3 100%);
 }
-.catalog-banner[data-tone="sample-vials"] {
-  background-image: linear-gradient(180deg, #eef2f6 0%, #d3dde8 40%, #8496ab 100%);
+.catalog-banner[data-tone="sample-vials"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(2, 9, 46, 0.72) 0%, rgba(2, 9, 46, 0.28) 46%, rgba(2, 9, 46, 0.08) 100%);
 }
 .catalog-banner[data-tone="awaiting-items"] {
   grid-template-columns: minmax(0, 720px);
