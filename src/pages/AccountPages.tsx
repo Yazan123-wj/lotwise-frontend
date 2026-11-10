@@ -33,25 +33,35 @@ function OrderCard({ order }: { order: SampleOrder }) {
   )
 }
 
-const links = [
+const signedInLinks: Array<{ to: string; label: string; end?: boolean }> = [
   { to: "/account", label: "Overview", end: true },
   { to: "/account/profile", label: "Profile" },
   { to: "/account/addresses", label: "Addresses" },
   { to: "/account/orders", label: "Orders" },
   { to: "/account/referrals", label: "Refer a friend" },
+]
+
+const guestLinks: Array<{ to: string; label: string; end?: boolean }> = [
   { to: "/account/sign-in", label: "Sign in" },
-  { to: "/account/register", label: "Register" },
+  { to: "/account/register", label: "Create account" },
   { to: "/account/reset", label: "Reset password" },
 ]
 
 function Gate({ children }: { children: ReactNode }) {
+  const session = useSession()
   const { preview, setPreview } = useCart()
-  if (preview) return children
+  if (session.customer || preview) return children
   return (
-    <div className="panel">
-      <h2 className="display" style={{ fontSize: 36 }}>Preview signed-in screens</h2>
-      <p className="lede">These screens preview a signed-in account. Opening them does not create or access an account.</p>
-      <SpecularButton tone="primary" type="button" style={{ marginTop: 16 }} onClick={() => setPreview(true)}>Preview signed-in screens</SpecularButton>
+    <div className="account-empty">
+      <h2>Sign in to open your account</h2>
+      <p className="lede">Orders, profile details, and your referral link stay with your LotWise account.</p>
+      <div className="account-empty__actions">
+        <SpecularButton tone="primary" to="/account/sign-in">Sign in</SpecularButton>
+        <SpecularButton tone="ghost" to="/account/register">Create account</SpecularButton>
+      </div>
+      <button className="text-btn" type="button" onClick={() => setPreview(true)}>
+        Preview sample account screens
+      </button>
     </div>
   )
 }
@@ -59,8 +69,12 @@ function Gate({ children }: { children: ReactNode }) {
 export function AccountLayout() {
   useTitle("Account")
   const session = useSession()
+  const { preview } = useCart()
   const { pathname } = useLocation()
   const navRef = useRef<HTMLElement>(null)
+  const signedIn = Boolean(session.customer)
+  const links = signedIn || preview ? signedInLinks : guestLinks
+
   useEffect(() => {
     const nav = navRef.current
     const current = nav?.querySelector<HTMLElement>('[aria-current="page"]')
@@ -70,48 +84,140 @@ export function AccountLayout() {
     if (item.left < navBox.left) nav.scrollLeft -= navBox.left - item.left + 14
     else if (item.right > navBox.right) nav.scrollLeft += item.right - navBox.right + 14
   }, [pathname])
+
   return (
-    <div className="wrap">
-      <header className="page-hero">
+    <div className="wrap account-page">
+      <header className="account-hero">
         <p className="eyebrow">Account</p>
-        <h1 className="display">{session.customer ? session.customer.name : "Account preview"}</h1>
-        {session.customer ? <p className="lede">{session.customer.email}</p> : null}
+        <h1>{session.customer ? session.customer.name : preview ? "Sample account" : "Your account"}</h1>
+        <p className="lede">
+          {session.customer
+            ? session.customer.email
+            : preview
+              ? "Preview mode · sample data only"
+              : "Sign in to manage your profile, orders, and referrals."}
+        </p>
       </header>
       <div className="account">
-        <nav className="side-nav" aria-label="Account" ref={navRef}>
-          {links.map((link) => (
-            <NavLink key={link.to} to={link.to} end={link.end}>{link.label}</NavLink>
-          ))}
-          {session.customer ? <button className="text-btn" type="button" onClick={() => session.logout()}>Sign out</button> : null}
-        </nav>
-        <div><Outlet /></div>
+        <aside className="account-side">
+          <nav className="side-nav" aria-label="Account" ref={navRef}>
+            {links.map((link) => (
+              <NavLink key={link.to} to={link.to} end={link.end}>{link.label}</NavLink>
+            ))}
+          </nav>
+          {session.customer ? (
+            <button className="side-nav__signout" type="button" onClick={() => session.logout()}>
+              Sign out
+            </button>
+          ) : null}
+          {preview && !session.customer ? <p className="account-side__note">Sample preview is on</p> : null}
+        </aside>
+        <div className="account-main"><Outlet /></div>
       </div>
     </div>
   )
 }
 
 export function OverviewPage() {
-  const { preview } = useCart()
-  const orders = sampleOrders.filter((order) => order.customerId === previewCustomer.id)
+  const session = useSession()
+  const { preview, receipt } = useCart()
+  const sample = sampleOrders.filter((order) => order.customerId === previewCustomer.id)
+  const signedIn = Boolean(session.customer)
+
+  if (!signedIn && !preview) {
+    return (
+      <Gate>
+        <span />
+      </Gate>
+    )
+  }
+
+  if (signedIn && session.customer) {
+    return (
+      <div className="account-panel">
+        <div className="account-panel__head">
+          <div>
+            <p className="eyebrow">Overview</p>
+            <h2>Welcome back</h2>
+            <p className="meta">Your signed-in LotWise account on this browser.</p>
+          </div>
+          <SpecularButton tone="ghost" to="/account/referrals">Refer a friend</SpecularButton>
+        </div>
+        <div className="account-stats">
+          <article className="account-stat">
+            <span>Name</span>
+            <strong>{session.customer.name}</strong>
+          </article>
+          <article className="account-stat">
+            <span>Email</span>
+            <strong className="account-stat__email">{session.customer.email}</strong>
+          </article>
+          <article className="account-stat">
+            <span>Referrals</span>
+            <strong>Open</strong>
+            <Link className="account-stat__link" to="/account/referrals">View your link</Link>
+          </article>
+        </div>
+        <div className="order-head">
+          <h2>Recent activity</h2>
+          <Link to="/account/orders">All orders</Link>
+        </div>
+        {receipt ? (
+          <div className="order-list">
+            <Link className="order-card" to={`/account/orders/${receipt.reference}`}>
+              <span>
+                <strong>{receipt.reference}</strong>
+                <span className="meta">Demonstration checkout from this browser</span>
+                <span className="meta">{receipt.note}</span>
+              </span>
+              <span className="order-card-side">
+                <span className="order-status">Demo</span>
+                <b>{formatMoney(receipt.total)}</b>
+              </span>
+            </Link>
+          </div>
+        ) : (
+          <div className="account-empty account-empty--inset">
+            <p>No orders on this account yet.</p>
+            <SpecularButton tone="primary" to="/shop">Browse the catalogue</SpecularButton>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <Gate>
-      {preview ? (
-        <>
-          <p className="lede">Sample customer profile. No account exists for this person.</p>
-          <div className="stats" style={{ marginTop: 16 }}>
-            <article className="stat"><span className="meta">Name</span><b style={{ fontSize: 22 }}>{previewCustomer.name}</b></article>
-            <article className="stat"><span className="meta">Email</span><b style={{ fontSize: 18 }}>{previewCustomer.email}</b></article>
-            <article className="stat"><span className="meta">Sample orders</span><b>{orders.length}</b></article>
+      <div className="account-panel">
+        <div className="account-panel__head">
+          <div>
+            <p className="eyebrow">Sample preview</p>
+            <h2>Overview</h2>
+            <p className="meta">This is sample data for layout review. It is not a real customer account.</p>
           </div>
-          <div className="order-head">
-            <h2>Recent sample orders</h2>
-            <Link to="/account/orders">All orders</Link>
-          </div>
-          <div className="order-list">
-            {orders.map((order) => <OrderCard key={order.id} order={order} />)}
-          </div>
-        </>
-      ) : null}
+        </div>
+        <div className="account-stats">
+          <article className="account-stat">
+            <span>Name</span>
+            <strong>{previewCustomer.name}</strong>
+          </article>
+          <article className="account-stat">
+            <span>Email</span>
+            <strong className="account-stat__email">{previewCustomer.email}</strong>
+          </article>
+          <article className="account-stat">
+            <span>Sample orders</span>
+            <strong>{sample.length}</strong>
+          </article>
+        </div>
+        <div className="order-head">
+          <h2>Recent sample orders</h2>
+          <Link to="/account/orders">All orders</Link>
+        </div>
+        <div className="order-list">
+          {sample.map((order) => <OrderCard key={order.id} order={order} />)}
+        </div>
+      </div>
     </Gate>
   )
 }
@@ -132,27 +238,28 @@ export function SignInPage() {
     }
     try {
       await session.login({ email, password })
-      navigate("/account/referrals")
+      setPreview(false)
+      navigate("/account")
     } catch (error) {
       setMessage(sessionError(error, "Sign-in failed."))
     }
   }
   return (
-    <form className="panel" onSubmit={onSubmit}>
+    <form className="account-form" onSubmit={onSubmit}>
       <h2>Sign in</h2>
-      <p className="meta">This form checks the referral service and starts a session on this browser. The password is not kept on the page.</p>
-      <label className="field"><span>Email</span><input name="email" type="email" required /></label>
-      <label className="field"><span>Password</span><input name="password" type="password" required minLength={8} /></label>
-      <SpecularButton tone="primary" type="submit">Submit form</SpecularButton>
+      <p className="meta">Use the email and password for your LotWise account.</p>
+      <label className="field"><span>Email</span><input name="email" type="email" required autoComplete="username" /></label>
+      <label className="field"><span>Password</span><input name="password" type="password" required minLength={8} autoComplete="current-password" /></label>
+      <SpecularButton tone="primary" type="submit">Sign in</SpecularButton>
       {message ? <p className="notice">{message}</p> : null}
-      <p className="meta">Guest checkout remains available from the cart. The preview button below still opens the sample account screens.</p>
-      <SpecularButton tone="ghost" type="button" onClick={() => setPreview(true)}>Preview signed-in screens</SpecularButton>
+      <p className="meta">Need an account? <Link to="/account/register">Create one</Link></p>
     </form>
   )
 }
 
 export function RegisterPage() {
   const [message, setMessage] = useState("")
+  const { setPreview } = useCart()
   const session = useSession()
   const navigate = useNavigate()
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -170,22 +277,24 @@ export function RegisterPage() {
         email: String(data.get("email") ?? ""),
         password,
       })
-      navigate("/account/referrals")
+      setPreview(false)
+      navigate("/account")
       if (result.linked) setMessage("This account is linked to the referral visit on this browser.")
     } catch (error) {
       setMessage(sessionError(error, "The account could not be created."))
     }
   }
   return (
-    <form className="panel" onSubmit={onSubmit}>
-      <h2>Register</h2>
-      <p className="meta">This creates an account in the referral service. If you opened a referral link in this browser, the new account is linked to it.</p>
-      <label className="field"><span>Name</span><input name="name" required /></label>
-      <label className="field"><span>Email</span><input name="email" type="email" required /></label>
-      <label className="field"><span>Password</span><input name="password" type="password" required /></label>
-      <label className="field"><span>Confirm password</span><input name="confirm" type="password" required /></label>
-      <SpecularButton tone="primary" type="submit">Submit form</SpecularButton>
+    <form className="account-form" onSubmit={onSubmit}>
+      <h2>Create account</h2>
+      <p className="meta">If you opened a referral link in this browser, the new account is linked to it.</p>
+      <label className="field"><span>Name</span><input name="name" required autoComplete="name" /></label>
+      <label className="field"><span>Email</span><input name="email" type="email" required autoComplete="email" /></label>
+      <label className="field"><span>Password</span><input name="password" type="password" required minLength={8} autoComplete="new-password" /></label>
+      <label className="field"><span>Confirm password</span><input name="confirm" type="password" required minLength={8} autoComplete="new-password" /></label>
+      <SpecularButton tone="primary" type="submit">Create account</SpecularButton>
       {message ? <p className="notice">{message}</p> : null}
+      <p className="meta">Already have an account? <Link to="/account/sign-in">Sign in</Link></p>
     </form>
   )
 }
@@ -194,66 +303,100 @@ export function ResetPage() {
   const [message, setMessage] = useState("")
   return (
     <form
-      className="panel"
+      className="account-form"
       onSubmit={(event) => {
         event.preventDefault()
         setMessage("This form does not send email or change a password.")
       }}
     >
       <h2>Reset password</h2>
+      <p className="meta">Password reset email is not connected yet.</p>
       <label className="field"><span>Email</span><input name="email" type="email" required /></label>
-      <SpecularButton tone="primary" type="submit">Submit form</SpecularButton>
+      <SpecularButton tone="primary" type="submit">Continue</SpecularButton>
       {message ? <p className="notice">{message}</p> : null}
     </form>
   )
 }
 
 export function ProfilePage() {
+  const session = useSession()
   const [saved, setSaved] = useState(false)
+  const name = session.customer?.name ?? previewCustomer.name
+  const email = session.customer?.email ?? previewCustomer.email
   return (
     <Gate>
       <form
-        className="panel"
+        className="account-form"
         onSubmit={(event) => {
           event.preventDefault()
           setSaved(true)
         }}
       >
         <h2>Profile</h2>
-        <label className="field"><span>Name</span><input defaultValue={previewCustomer.name} /></label>
-        <label className="field"><span>Email</span><input defaultValue={previewCustomer.email} /></label>
-        <label className="field"><span>Phone</span><input defaultValue={previewCustomer.phone} /></label>
-        <SpecularButton tone="primary" type="submit">Keep on this page</SpecularButton>
-        {saved ? <p className="notice">The edit was kept on this page only. It was not saved to an account.</p> : null}
+        <p className="meta">
+          {session.customer
+            ? "These details come from your signed-in account."
+            : "Sample preview details. Edits stay on this page only."}
+        </p>
+        <label className="field"><span>Name</span><input defaultValue={name} key={`name-${name}`} /></label>
+        <label className="field"><span>Email</span><input defaultValue={email} key={`email-${email}`} readOnly={Boolean(session.customer)} /></label>
+        <label className="field"><span>Phone</span><input defaultValue={session.customer ? "" : previewCustomer.phone} placeholder={session.customer ? "Add a phone number" : undefined} /></label>
+        <SpecularButton tone="primary" type="submit">{session.customer ? "Save on this page" : "Keep on this page"}</SpecularButton>
+        {saved ? (
+          <p className="notice">
+            {session.customer
+              ? "The edit was kept on this page only for now."
+              : "The edit was kept on this page only. It was not saved to an account."}
+          </p>
+        ) : null}
       </form>
     </Gate>
   )
 }
 
 export function AddressesPage() {
+  const session = useSession()
   const { addresses, addAddress } = useCart()
   const [draft, setDraft] = useState<Address>({ ...sampleAddress, line1: "" })
   const [note, setNote] = useState("")
-  const shown = [previewCustomer.address, ...addresses]
+  const shown = session.customer ? addresses : [previewCustomer.address, ...addresses]
   return (
     <Gate>
-      <div className="panel">
-        <h2>Addresses</h2>
-        {shown.map((address) => (
-          <p key={address.line1}>{address.line1}, {address.city}, {address.region} {address.postalCode}, {address.country}</p>
-        ))}
+      <div className="account-panel">
+        <div className="account-panel__head">
+          <div>
+            <h2>Addresses</h2>
+            <p className="meta">
+              {session.customer
+                ? "Addresses added here stay in this browser for checkout."
+                : "Sample address plus any addresses added on this page."}
+            </p>
+          </div>
+        </div>
+        <div className="address-list">
+          {shown.length === 0 ? <p className="meta">No addresses yet.</p> : null}
+          {shown.map((address) => (
+            <article className="address-card" key={`${address.line1}-${address.postalCode}`}>
+              <strong>{address.line1}</strong>
+              <span className="meta">{address.city}, {address.region} {address.postalCode}</span>
+              <span className="meta">{address.country}</span>
+            </article>
+          ))}
+        </div>
         <form
+          className="account-form account-form--nested"
           onSubmit={(event) => {
             event.preventDefault()
             if (!draft.line1.trim()) return
             addAddress(draft)
-            setNote("The address was added to this page only. It was not saved to an account.")
+            setNote("The address was added on this browser only.")
             setDraft({ ...sampleAddress, line1: "" })
           }}
         >
+          <h3>Add address</h3>
           <label className="field"><span>Address</span><input value={draft.line1} onChange={(event) => setDraft({ ...draft, line1: event.target.value })} required /></label>
           <label className="field"><span>City</span><input value={draft.city} onChange={(event) => setDraft({ ...draft, city: event.target.value })} /></label>
-          <SpecularButton tone="primary" type="submit">Add on this page</SpecularButton>
+          <SpecularButton tone="primary" type="submit">Add address</SpecularButton>
         </form>
         {note ? <p className="notice">{note}</p> : null}
       </div>
@@ -262,18 +405,51 @@ export function AddressesPage() {
 }
 
 export function OrdersPage() {
+  const session = useSession()
   const { receipt } = useCart()
   const orders = sampleOrders.filter((order) => order.customerId === previewCustomer.id)
   return (
     <Gate>
-      <h2>Orders</h2>
-      <p className="meta">Sample orders plus any demonstration confirmation from this browser. These are not purchases.</p>
-      <div className="order-list">
-        {orders.map((order) => <OrderCard key={order.id} order={order} />)}
+      <div className="account-panel">
+        <div className="account-panel__head">
+          <div>
+            <h2>Orders</h2>
+            <p className="meta">
+              {session.customer
+                ? "Demonstration checkouts from this browser appear here. Card payment is not collected."
+                : "Sample orders plus any demonstration confirmation from this browser."}
+            </p>
+          </div>
+        </div>
+        {session.customer ? (
+          receipt ? (
+            <div className="order-list">
+              <Link className="order-card" to={`/account/orders/${receipt.reference}`}>
+                <span>
+                  <strong>{receipt.reference}</strong>
+                  <span className="meta">Demonstration checkout</span>
+                </span>
+                <span className="order-card-side">
+                  <span className="order-status">Demo</span>
+                  <b>{formatMoney(receipt.total)}</b>
+                </span>
+              </Link>
+            </div>
+          ) : (
+            <div className="account-empty account-empty--inset">
+              <p>No orders yet.</p>
+              <SpecularButton tone="primary" to="/shop">Browse the catalogue</SpecularButton>
+            </div>
+          )
+        ) : (
+          <div className="order-list">
+            {orders.map((order) => <OrderCard key={order.id} order={order} />)}
+            {receipt ? (
+              <p className="notice"><Link to={`/account/orders/${receipt.reference}`}>{receipt.reference}</Link> · demonstration · {formatMoney(receipt.total)}</p>
+            ) : null}
+          </div>
+        )}
       </div>
-      {receipt ? (
-        <p className="notice"><Link to={`/account/orders/${receipt.reference}`}>{receipt.reference}</Link> · demonstration · {formatMoney(receipt.total)}</p>
-      ) : null}
     </Gate>
   )
 }
@@ -287,9 +463,9 @@ export function OrderDetailPage() {
   return (
     <Gate>
       {!order && !isReceipt ? (
-        <div className="error-box">That record is not part of the sample account or this browser’s demonstration checkout.</div>
+        <div className="error-box">That order is not in this account.</div>
       ) : order ? (
-        <article className="panel">
+        <article className="account-panel">
           <h2>{order.orderNumber}</h2>
           <p className="meta">{formatDate(order.placedAt)} · {order.fulfilmentStatus} · Payment not collected</p>
           <p>{order.note}</p>
@@ -299,7 +475,7 @@ export function OrderDetailPage() {
           <p><strong>{formatMoney(order.provisionalTotal)}</strong></p>
         </article>
       ) : receipt ? (
-        <article className="panel">
+        <article className="account-panel">
           <h2>{receipt.reference}</h2>
           <p>{receipt.note}</p>
           {receipt.items.map((item) => (
