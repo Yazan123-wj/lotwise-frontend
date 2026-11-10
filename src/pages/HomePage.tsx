@@ -10,6 +10,7 @@ import {
   productByCode,
   visibleProducts,
 } from "../lib/catalog.ts"
+import { mediaSrc } from "../lib/media.ts"
 
 const steps = [
   { n: "01", title: "Explore", body: "Open the catalog and filter by area.", to: "/shop", label: "Open the catalog" },
@@ -61,9 +62,9 @@ export function HomePage() {
         </AnimatedContent>
         <AnimatedContent className="hero-visual" distance={80} delay={0.12} duration={0.8} ease="power3.out">
           <div className="vial-cluster">
-            <img className="vial-back vial-back-left" src="/images/hero-vial.png" alt="" />
-            <img className="vial-back vial-back-right" src="/images/hero-vial.png" alt="" />
-            <img className="vial-front" src="/images/hero-vial.png" alt="Sample catalogue vial" />
+            <img className="vial-back vial-back-left" src={mediaSrc("/images/hero-vial.png")} alt="" decoding="async" />
+            <img className="vial-back vial-back-right" src={mediaSrc("/images/hero-vial.png")} alt="" decoding="async" />
+            <img className="vial-front" src={mediaSrc("/images/hero-vial.png")} alt="Sample catalogue vial" fetchPriority="high" decoding="async" />
           </div>
         </AnimatedContent>
       </section>
@@ -80,7 +81,7 @@ export function HomePage() {
             <SpecularButton tone="ghost" to="/shop">Full catalog</SpecularButton>
           </div>
           <article className="area-stage">
-            <img src={area.imagePath} alt="" />
+            <img src={mediaSrc(area.imagePath)} alt="" loading="lazy" decoding="async" />
             <div>
               <p className="eyebrow" style={{ color: "rgba(255,255,255,.75)" }}>
                 Area {String(area.displayOrder).padStart(2, "0")} · {countInCategory(area.slug)} records
@@ -123,7 +124,7 @@ export function HomePage() {
             <SpecularButton tone="ghost" to="/about" style={{ marginTop: 18 }}>About LotWise</SpecularButton>
           </div>
           <figure className="figure">
-            <img src="/images/hero-vial.png" alt="" />
+            <img src={mediaSrc("/images/hero-vial.png")} alt="" loading="lazy" decoding="async" />
             <figcaption>Fig. 01 — {sample?.name ?? "Sample record"} · Research use only</figcaption>
           </figure>
         </div>
@@ -185,7 +186,7 @@ export function HomePage() {
                 {certificates.map((file) => (
                   <figure className="cert-slide" key={file.id}>
                     <a href={file.href} target="_blank" rel="noopener noreferrer">
-                      <img src={file.image} alt={file.alt} />
+                      <img src={file.image} alt={file.alt} loading="lazy" decoding="async" />
                     </a>
                   </figure>
                 ))}
@@ -231,7 +232,7 @@ export function HomePage() {
               </p>
             ) : null}
           </div>
-          <img src="/images/lotwise-vial.png" alt="" style={{ borderRadius: 28 }} />
+          <img src={mediaSrc("/images/lotwise-vial.png")} alt="" style={{ borderRadius: 28 }} loading="lazy" decoding="async" />
         </div>
       </section>
       </AnimatedContent>

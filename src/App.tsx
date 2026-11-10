@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react"
+import { lazy, Suspense, useEffect, useState, type ComponentType, type ReactNode } from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { StoreLayout } from "./components/Shell.tsx"
 import {
@@ -20,27 +20,6 @@ import {
   ResetPage,
   SignInPage,
 } from "./pages/AccountPages.tsx"
-import {
-  AdminLayout,
-  AdminLogin,
-  AffiliateForm,
-  AffiliatesAdmin,
-  CategoriesAdmin,
-  CategoryForm,
-  CustomerDetail,
-  CustomersAdmin,
-  DashboardPage,
-  DiscountForm,
-  DiscountsAdmin,
-  HomepageAdmin,
-  InventoryAdmin,
-  OrderAdminDetail,
-  OrdersAdmin,
-  ProductForm,
-  ProductsAdmin,
-  SettingsAdmin,
-  UsersAdmin,
-} from "./pages/AdminPages.tsx"
 import { CategoryPage, ProductPage, SearchPage, ShopPage } from "./pages/CatalogPages.tsx"
 import { CartPage, CheckoutPage, ConfirmationPage } from "./pages/CommercePages.tsx"
 import { HomePage } from "./pages/HomePage.tsx"
@@ -48,7 +27,38 @@ import { applyStore } from "./lib/live.ts"
 import { CartProvider } from "./state/cart.tsx"
 import { SessionProvider } from "./state/session.tsx"
 import { ReferralDashboardPage, ReferralInfoPage, ReferralLandingPage } from "./pages/ReferralPages.tsx"
-import { ReferralsAdmin } from "./pages/ReferralAdmin.tsx"
+
+function lazyNamed<Module extends Record<string, ComponentType<unknown>>>(
+  loader: () => Promise<Module>,
+  exportName: keyof Module,
+) {
+  return lazy(async () => {
+    const module = await loader()
+    return { default: module[exportName] }
+  })
+}
+
+const admin = () => import("./pages/AdminPages.tsx")
+const AdminLogin = lazyNamed(admin, "AdminLogin")
+const AdminLayout = lazyNamed(admin, "AdminLayout")
+const DashboardPage = lazyNamed(admin, "DashboardPage")
+const ProductsAdmin = lazyNamed(admin, "ProductsAdmin")
+const ProductForm = lazyNamed(admin, "ProductForm")
+const CategoriesAdmin = lazyNamed(admin, "CategoriesAdmin")
+const CategoryForm = lazyNamed(admin, "CategoryForm")
+const InventoryAdmin = lazyNamed(admin, "InventoryAdmin")
+const OrdersAdmin = lazyNamed(admin, "OrdersAdmin")
+const OrderAdminDetail = lazyNamed(admin, "OrderAdminDetail")
+const CustomersAdmin = lazyNamed(admin, "CustomersAdmin")
+const CustomerDetail = lazyNamed(admin, "CustomerDetail")
+const DiscountsAdmin = lazyNamed(admin, "DiscountsAdmin")
+const DiscountForm = lazyNamed(admin, "DiscountForm")
+const AffiliatesAdmin = lazyNamed(admin, "AffiliatesAdmin")
+const AffiliateForm = lazyNamed(admin, "AffiliateForm")
+const HomepageAdmin = lazyNamed(admin, "HomepageAdmin")
+const UsersAdmin = lazyNamed(admin, "UsersAdmin")
+const SettingsAdmin = lazyNamed(admin, "SettingsAdmin")
+const ReferralsAdmin = lazy(() => import("./pages/ReferralAdmin.tsx").then((module) => ({ default: module.ReferralsAdmin })))
 
 function CatalogueSync({ children }: { children: ReactNode }) {
   const [version, setVersion] = useState(0)
@@ -65,12 +75,17 @@ function CatalogueSync({ children }: { children: ReactNode }) {
   return <div key={version}>{children}</div>
 }
 
+function AdminFallback() {
+  return <p className="meta" style={{ padding: 24 }}>Loading…</p>
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <CartProvider>
         <SessionProvider>
         <CatalogueSync>
+        <Suspense fallback={<AdminFallback />}>
         <Routes>
           <Route path="admin/login" element={<AdminLogin />} />
           <Route path="admin" element={<AdminLayout />}>
@@ -127,6 +142,7 @@ export default function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
+        </Suspense>
         </CatalogueSync>
         </SessionProvider>
       </CartProvider>

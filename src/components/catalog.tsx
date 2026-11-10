@@ -14,13 +14,14 @@ import {
   visibleProducts,
 } from "../lib/catalog.ts"
 import SpecularButton from "./SpecularButton.tsx"
+import { mediaSrc } from "../lib/media.ts"
 import { useCart } from "../state/cart.tsx"
 import type { Product, StockStatus } from "../types.ts"
 
 const pageSize = 8
 
 const areaBanners: Record<string, { photo?: string; cutout?: string }> = {
-  catalog: { cutout: "/images/lotwise-vial.png" },
+  catalog: { cutout: "/images/lotwise-vial.webp" },
   "sample-vials": { photo: "/images/banners/area-vials.jpg" },
   "reference-materials": { photo: "/images/banners/area-reference.jpg" },
   "sample-kits": { photo: "/images/banners/area-kits.jpg" },
@@ -92,7 +93,7 @@ export function ProductCard({ product }: { product: Product }) {
     <article className="product-card">
       <Link to={`/products/${product.slug}`}>
         <div className="media">
-          <img src={product.imagePaths[0]} alt="" />
+          <img src={mediaSrc(product.imagePaths[0] ?? "/images/lotwise-vial.png")} alt="" loading="lazy" decoding="async" />
           <span className="chip">{categoryName(product.categorySlug)}</span>
         </div>
         <h3>{product.name}</h3>

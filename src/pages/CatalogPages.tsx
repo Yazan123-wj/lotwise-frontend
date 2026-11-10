@@ -15,6 +15,7 @@ import {
   variationStock,
   visibleProducts,
 } from "../lib/catalog.ts"
+import { mediaSrc } from "../lib/media.ts"
 import { useTitle } from "../lib/useTitle.ts"
 import { useCart } from "../state/cart.tsx"
 
@@ -135,13 +136,13 @@ export function ProductPage() {
       <div className="product-layout">
         <div className="gallery">
           <div className="gallery-main">
-            <img src={product.imagePaths[image] ?? product.imagePaths[0]} alt="" />
+            <img src={mediaSrc(product.imagePaths[image] ?? product.imagePaths[0] ?? "/images/lotwise-vial.png")} alt="" decoding="async" fetchPriority="high" />
           </div>
           {product.imagePaths.length > 1 ? (
             <div className="thumbs">
               {product.imagePaths.map((src, index) => (
                 <button key={src} type="button" aria-label={`Image ${index + 1}`} aria-pressed={index === image} onClick={() => setImage(index)}>
-                  <img src={src} alt="" />
+                  <img src={mediaSrc(src)} alt="" loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>
