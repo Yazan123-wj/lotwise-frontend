@@ -7,15 +7,23 @@ import { formatDate, formatMoney, quoteDiscount } from "../lib/catalog.ts"
 import { useTitle } from "../lib/useTitle.ts"
 import { useCart } from "../state/cart.tsx"
 import { sessionError, useSession } from "../state/session.tsx"
-import type { Address } from "../types.ts"
+import type { Address, Receipt } from "../types.ts"
 
-function readRecordedOrder(): { orderNumber?: string; status?: string; error?: string } | null {
-  try {
-    const raw = sessionStorage.getItem("lotwise-referral-order")
-    return raw ? JSON.parse(raw) as { orderNumber?: string; status?: string; error?: string } : null
-  } catch {
-    return null
-  }
+type PlacedOrder = {
+  id: string
+  orderNumber: string
+  status: string
+  subtotal: number
+  discountAmount: number
+  discountCode: string | null
+  total: number
+  createdAt: string
+  items: Array<{ sku: string; name: string; quantity: number; unitPrice: number }>
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+  shippingAddress: Address
+  shippingMethod: string
 }
 
 const emptyAddress: Address = {
@@ -39,7 +47,7 @@ export function CartPage() {
     const local = quoteDiscount(cart.subtotal, code)
     if (local.applied || !code.trim()) return
     if (!session.customer) {
-      cart.setServerDiscount({ code, amount: 0, applied: null, message: local.message })
+      cart.setServerDiscount({ code, amount: 0, applied: null, message: "Sign in to apply a referral reward code." })
       return
     }
     try {
@@ -56,8 +64,8 @@ export function CartPage() {
     <div className="wrap" style={{ paddingBottom: 64 }}>
       <header className="page-hero">
         <p className="eyebrow">Cart</p>
-        <h1 className="display">Records in this browser</h1>
-        <p className="lede">Items stay in this browser. Prices are sample figures and are not reserved.</p>
+        <h1 className="display">Your cart</h1>
+        <p className="lede">Review items before checkout. Shipping is confirmed after you place the order.</p>
       </header>
       {cart.lines.length === 0 ? (
         <div className="empty">
@@ -86,25 +94,20 @@ export function CartPage() {
           </div>
           <aside className="panel">
             <h2 className="display" style={{ fontSize: 32 }}>Summary</h2>
-            <form
-              className="lookup"
-              style={{ marginTop: 12 }}
-              onSubmit={applyCode}
-            >
-              <input aria-label="Discount code" value={code} placeholder="DEMO10 or FIXED5" onChange={(event) => setCode(event.target.value)} />
+            <form className="lookup" style={{ marginTop: 12 }} onSubmit={applyCode}>
+              <input aria-label="Discount code" value={code} placeholder="Discount or reward code" onChange={(event) => setCode(event.target.value)} />
               <SpecularButton tone="ghost" type="submit">Apply</SpecularButton>
             </form>
-            <p className="meta">DEMO10 and FIXED5 can be previewed in the cart. Usage counts are sample numbers.</p>
             {cart.discountMessage ? <p className="notice">{cart.discountMessage}</p> : null}
-            {cart.appliedCode ? <p className="notice">{cart.appliedCode} is attached in this browser.</p> : null}
+            {cart.appliedCode ? <p className="notice">{cart.appliedCode} applied.</p> : null}
             <div className="totals">
               <div><span>Subtotal</span><span>{formatMoney(cart.subtotal)}</span></div>
               <div><span>Discount</span><span>{formatMoney(cart.discountAmount)}</span></div>
-              <div><span>Shipping</span><span>Not quoted</span></div>
-              <p><strong>Provisional total</strong><strong>{formatMoney(cart.total)}</strong></p>
+              <div><span>Shipping</span><span>Confirmed after order</span></div>
+              <p><strong>Total</strong><strong>{formatMoney(cart.total)}</strong></p>
             </div>
-            <p className="meta">This total uses sample prices in the browser. It is not server-validated and does not include shipping.</p>
-            {session.attribution.attached ? <p className="notice">A referral link is attached to this browser. It does not change this total.</p> : null}
+            <p className="meta">Card payment is not collected yet. Your order will be saved as awaiting payment.</p>
+            {session.attribution.attached ? <p className="notice">A referral link is attached to this browser.</p> : null}
             <SpecularButton tone="primary" to="/checkout" style={{ marginTop: 16 }}>Checkout</SpecularButton>
           </aside>
         </div>
@@ -119,11 +122,17 @@ export function CheckoutPage() {
   const session = useSession()
   const navigate = useNavigate()
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [formError, setFormError] = useState("")
+  const [busy, setBusy] = useState(false)
   const [address, setAddress] = useState<Address>(emptyAddress)
   const [shipping, setShipping] = useState(shippingMethods[0].id)
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (!session.customer) {
+      setFormError("Sign in to place your order.")
+      return
+    }
     const data = new FormData(event.currentTarget)
     const name = String(data.get("name") ?? "").trim()
     const email = String(data.get("email") ?? "").trim()
@@ -138,52 +147,96 @@ export function CheckoutPage() {
     if (!address.postalCode.trim()) nextErrors.postalCode = "Enter a postal code."
     if (!address.country.trim()) nextErrors.country = "Enter a country."
     setErrors(nextErrors)
+    setFormError("")
     if (Object.keys(nextErrors).length || cart.lines.length === 0) return
     const method = shippingMethods.find((item) => item.id === shipping) ?? shippingMethods[0]
-    const lines = cart.lines.map((line) => ({ sku: line.sku, quantity: line.quantity }))
-    const discountCode = cart.appliedCode
-    const receipt = cart.placeDemonstration({
-      name,
-      email,
-      phone,
-      shippingAddress: address,
-      shippingMethodLabel: method.label,
-    })
-    if (!receipt) return
-    if (session.customer) {
-      try {
-        const order = await api<{ orderNumber: string; status: string }>("/api/orders", {
-          method: "POST",
-          body: JSON.stringify({ lines, discountCode }),
-        })
-        sessionStorage.setItem("lotwise-referral-order", JSON.stringify(order))
-      } catch (error) {
-        sessionStorage.setItem("lotwise-referral-order", JSON.stringify({ error: sessionError(error, "The referral order was not recorded.") }))
+    setBusy(true)
+    try {
+      const response = await api<{ order: PlacedOrder }>("/api/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          lines: cart.lines.map((line) => ({ sku: line.sku, quantity: line.quantity })),
+          discountCode: cart.appliedCode,
+          name,
+          email,
+          phone,
+          shippingAddress: address,
+          shippingMethod: method.label,
+        }),
+      })
+      const order = response.order
+      const receipt: Receipt = {
+        reference: order.orderNumber,
+        createdAt: order.createdAt,
+        name: order.contactName,
+        email: order.contactEmail,
+        phone: order.contactPhone,
+        shippingAddress: order.shippingAddress,
+        shippingMethodLabel: order.shippingMethod,
+        items: order.items.map((item, index) => ({
+          id: `${order.id}-${index}`,
+          productId: "",
+          variationId: "",
+          name: item.name,
+          sku: item.sku,
+          variationLabel: "",
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+        subtotal: order.subtotal,
+        discountAmount: order.discountAmount,
+        discountCode: order.discountCode,
+        total: order.total,
+        referral: cart.referral,
+        note: "Your order is saved and awaiting payment. We will collect payment once checkout integration is live.",
       }
-    } else {
-      sessionStorage.removeItem("lotwise-referral-order")
+      cart.completeOrder(receipt)
+      cart.addAddress(address)
+      navigate("/order-confirmation")
+    } catch (error) {
+      setFormError(sessionError(error, "Your order could not be placed."))
+    } finally {
+      setBusy(false)
     }
-    navigate("/order-confirmation")
+  }
+
+  if (!session.ready) {
+    return (
+      <div className="wrap" style={{ paddingBottom: 64 }}>
+        <p className="meta">Loading checkout…</p>
+      </div>
+    )
   }
 
   return (
     <div className="wrap" style={{ paddingBottom: 64 }}>
       <header className="page-hero">
         <p className="eyebrow">Checkout</p>
-        <h1 className="display">Demonstration checkout</h1>
-        <p className="lede">Guest checkout still creates a demonstration confirmation and does not take payment. A signed-in account also records an unpaid order for the referral program.</p>
+        <h1 className="display">Place your order</h1>
+        <p className="lede">
+          Orders are stored on your account as awaiting payment. Card payment will be added once the payment provider is connected.
+        </p>
       </header>
-      {cart.lines.length === 0 ? (
+      {!session.customer ? (
+        <div className="account-empty">
+          <h2>Sign in to checkout</h2>
+          <p className="lede">Create an account or sign in so we can save your order and show it under Account → Orders.</p>
+          <div className="account-empty__actions">
+            <SpecularButton tone="primary" to="/account/sign-in">Sign in</SpecularButton>
+            <SpecularButton tone="ghost" to="/account/register">Create account</SpecularButton>
+          </div>
+        </div>
+      ) : cart.lines.length === 0 ? (
         <div className="empty">
-          <p>Add a placeholder product before using the checkout form.</p>
+          <p>Add a product before checking out.</p>
           <SpecularButton tone="primary" to="/shop">Browse catalogue</SpecularButton>
         </div>
       ) : (
         <form className="two" onSubmit={onSubmit}>
           <div className="panel">
             <h2>Contact</h2>
-            <label className="field"><span>Name</span><input name="name" required /><em className="error">{errors.name}</em></label>
-            <label className="field"><span>Email</span><input name="email" type="email" required /><em className="error">{errors.email}</em></label>
+            <label className="field"><span>Name</span><input name="name" defaultValue={session.customer.name} required /><em className="error">{errors.name}</em></label>
+            <label className="field"><span>Email</span><input name="email" type="email" defaultValue={session.customer.email} required /><em className="error">{errors.email}</em></label>
             <label className="field"><span>Phone</span><input name="phone" required /><em className="error">{errors.phone}</em></label>
             <h2 style={{ marginTop: 12 }}>Shipping address</h2>
             <label className="field"><span>Address</span><input value={address.line1} onChange={(event) => setAddress({ ...address, line1: event.target.value })} /><em className="error">{errors.line1}</em></label>
@@ -198,8 +251,9 @@ export function CheckoutPage() {
                 {shippingMethods.map((method) => <option key={method.id} value={method.id}>{method.label}</option>)}
               </select>
             </label>
-            <p className="notice">Shipping is confirmed with the account. This page does not quote a rate. Card numbers are not collected.</p>
-            <SpecularButton tone="primary" type="submit">Place demonstration confirmation</SpecularButton>
+            <p className="notice">Shipping rates are confirmed after the order. Payment is not collected on this page yet.</p>
+            {formError ? <p className="notice">{formError}</p> : null}
+            <SpecularButton tone="primary" type="submit" disabled={busy}>{busy ? "Placing order…" : "Place order"}</SpecularButton>
           </div>
           <aside className="panel">
             <h2>Summary</h2>
@@ -212,10 +266,10 @@ export function CheckoutPage() {
             <div className="totals">
               <div><span>Subtotal</span><span>{formatMoney(cart.subtotal)}</span></div>
               <div><span>Discount {cart.appliedCode ?? ""}</span><span>{formatMoney(cart.discountAmount)}</span></div>
-              <div><span>Shipping</span><span>Not quoted</span></div>
-              <p><strong>Provisional total</strong><strong>{formatMoney(cart.total)}</strong></p>
+              <div><span>Shipping</span><span>Confirmed after order</span></div>
+              <p><strong>Total</strong><strong>{formatMoney(cart.total)}</strong></p>
             </div>
-            {session.attribution.attached ? <p className="notice">A referral link is attached to this browser. It does not change this total.</p> : null}
+            {session.attribution.attached ? <p className="notice">A referral link is attached to this browser.</p> : null}
           </aside>
         </form>
       )}
@@ -224,15 +278,14 @@ export function CheckoutPage() {
 }
 
 export function ConfirmationPage() {
-  useTitle("Confirmation")
+  useTitle("Order confirmation")
   const { receipt } = useCart()
-  const recorded = readRecordedOrder()
   if (!receipt) {
     return (
       <div className="wrap" style={{ padding: "32px 0 64px" }}>
         <div className="empty">
-          <h1 className="display" style={{ fontSize: 48 }}>No confirmation in this browser.</h1>
-          <p>Complete the checkout form to preview this page. Doing so still does not place an order.</p>
+          <h1 className="display" style={{ fontSize: 48 }}>No order confirmation here.</h1>
+          <p>Place an order at checkout to see this page.</p>
           <SpecularButton tone="primary" to="/checkout">Go to checkout</SpecularButton>
         </div>
       </div>
@@ -241,15 +294,13 @@ export function ConfirmationPage() {
   return (
     <div className="wrap" style={{ paddingBottom: 64 }}>
       <header className="page-hero">
-        <p className="eyebrow">Demonstration</p>
-        <h1 className="display">Confirmation preview</h1>
+        <p className="eyebrow">Order placed</p>
+        <h1 className="display">Thank you</h1>
         <p className="lede">{receipt.note}</p>
       </header>
       <div className="panel">
         <p><strong>{receipt.reference}</strong></p>
-        <p className="meta">{formatDate(receipt.createdAt)} · Payment not collected</p>
-        {recorded?.orderNumber ? <p className="notice">Referral order {recorded.orderNumber} was recorded as {recorded.status}. A purchase-based referral does not qualify until an administrator marks it paid.</p> : null}
-        {recorded?.error ? <p className="notice">{recorded.error}</p> : null}
+        <p className="meta">{formatDate(receipt.createdAt)} · Awaiting payment</p>
         <p style={{ marginTop: 12 }}>{receipt.name}<br />{receipt.email}<br />{receipt.phone}</p>
         <p className="meta" style={{ marginTop: 12 }}>
           {receipt.shippingAddress.line1}{receipt.shippingAddress.line2 ? `, ${receipt.shippingAddress.line2}` : ""}
@@ -262,9 +313,12 @@ export function ConfirmationPage() {
             <p key={item.id}>{item.name} · {item.sku} × {item.quantity} · {formatMoney(item.unitPrice * item.quantity)}</p>
           ))}
         </div>
-        <p style={{ marginTop: 12 }}><strong>Provisional total {formatMoney(receipt.total)}</strong></p>
+        <p style={{ marginTop: 12 }}><strong>Total {formatMoney(receipt.total)}</strong></p>
         {receipt.discountCode ? <p className="meta">Code {receipt.discountCode} · {formatMoney(receipt.discountAmount)}</p> : null}
-        <SpecularButton tone="ghost" to="/shop" style={{ marginTop: 16 }}>Continue browsing</SpecularButton>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
+          <SpecularButton tone="primary" to="/account/orders">View orders</SpecularButton>
+          <SpecularButton tone="ghost" to="/shop">Continue browsing</SpecularButton>
+        </div>
       </div>
     </div>
   )

@@ -189,7 +189,7 @@ export function ReferralsAdmin() {
     return (
       <form className="panel" onSubmit={signIn}>
         <h1 className="display">Referral admin</h1>
-        <p className="lede">Referral management requires an administrator session. The rest of this wireframe stays open.</p>
+        <p className="lede">Referral management requires an administrator session.</p>
         <label className="field"><span>Email</span><input value={adminEmail} onChange={(event) => setAdminEmail(event.target.value)} type="email" required /></label>
         <label className="field"><span>Password</span><input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required /></label>
         <SpecularButton tone="primary" type="submit">Sign in</SpecularButton>

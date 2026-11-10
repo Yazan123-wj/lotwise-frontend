@@ -47,7 +47,7 @@ export function AdminLogin() {
         <label className="field"><span>Email</span><input type="email" required /></label>
         <label className="field"><span>Password</span><input type="password" required /></label>
         <SpecularButton tone="primary" type="submit">Submit form</SpecularButton>
-        <SpecularButton tone="ghost" to="/admin">Open the wireframe</SpecularButton>
+        <SpecularButton tone="ghost" to="/admin">Open admin</SpecularButton>
         {note ? <p className="notice">{note}</p> : null}
       </form>
       </AnimatedContent>
@@ -240,7 +240,7 @@ export function OrderAdminDetail() {
   const { orderId } = useParams()
   const order = sampleOrders.find((item) => item.id === orderId)
   const [status, setStatus] = useState(order?.fulfilmentStatus ?? "placed")
-  if (!order) return <div className="error-box">That record is not in the wireframe data.</div>
+  if (!order) return <div className="error-box">That order was not found.</div>
   return (
     <article className="panel">
       <h1 className="display">{order.orderNumber}</h1>
@@ -278,7 +278,7 @@ export function CustomersAdmin() {
 export function CustomerDetail() {
   const { customerId } = useParams()
   const customer = customers.find((item) => item.id === customerId)
-  if (!customer) return <div className="error-box">That record is not in the wireframe data.</div>
+  if (!customer) return <div className="error-box">That customer was not found.</div>
   const orders = sampleOrders.filter((order) => order.customerId === customer.id)
   return (
     <article className="panel">

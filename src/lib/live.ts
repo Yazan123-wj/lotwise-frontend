@@ -33,9 +33,9 @@ export let announcement = [
 ]
 export let whatsapp = "https://wa.me/"
 export let hero: LiveHero = {
-  kicker: "LotWise / Catalogue review",
-  title: "Vial records, reference lots, and kits.",
-  lede: "Listed for review. Prices on this site are sample figures.",
+  kicker: "LotWise Labs",
+  title: "Research peptides, vials, and kits.",
+  lede: "Browse the live catalogue, add to cart, and place an order. Payment integration is coming next.",
 }
 
 export function applyStore(data: {

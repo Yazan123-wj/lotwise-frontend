@@ -232,7 +232,7 @@ export function CatalogBrowser({
       {filtered.length === 0 ? (
         <div className="empty">
           <h2 className="display" style={{ fontSize: 40 }}>No records in this view.</h2>
-          <p className="lede">Try another area, or clear the availability filter. Awaiting Items is an empty sample category.</p>
+          <p className="lede">Try another area, or clear the availability filter.</p>
         </div>
       ) : view === "all" ? (
         <>
@@ -259,7 +259,7 @@ export function CatalogBrowser({
               </div>
             ) : null}
             {group.items.length === 0 ? (
-              <div className="empty">No other sample products are in this category.</div>
+              <div className="empty">No products are in this category yet.</div>
             ) : (
               <div className="grid-cards">
                 {group.items.map((product) => <ProductCard key={product.id} product={product} />)}

@@ -140,7 +140,7 @@ export function quoteDiscount(subtotal: number, rawCode: string) {
     return {
       amount: 0,
       applied: null,
-      message: "That code is not in the sample list.",
+      message: "That code is not available.",
     }
   }
   const today = "2026-10-19"
@@ -153,14 +153,14 @@ export function quoteDiscount(subtotal: number, rawCode: string) {
     return {
       amount: 0,
       applied: null,
-      message: "That code is not active on this wireframe.",
+      message: "That code is not active.",
     }
   }
   if (subtotal < found.minOrderValue) {
     return {
       amount: 0,
       applied: null,
-      message: `The sample subtotal must reach ${formatMoney(found.minOrderValue)} before this code applies.`,
+      message: `Your subtotal must reach ${formatMoney(found.minOrderValue)} before this code applies.`,
     }
   }
   const amount =

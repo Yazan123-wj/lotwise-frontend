@@ -25,7 +25,7 @@ export function ShopPage() {
     <CatalogBrowser
       products={visibleProducts()}
       title="LotWise research catalog"
-      lede="Filter by area or type, then open a record. Prices and option labels are sample figures."
+      lede="Filter by area or type, then open a product to choose a size and add it to your cart."
     />
   )
 }
@@ -38,7 +38,7 @@ export function CategoryPage() {
     return (
       <div className="wrap" style={{ padding: "32px 0 64px" }}>
         <div className="error-box">
-          <h1 className="display" style={{ fontSize: 48 }}>That record is not in the wireframe data.</h1>
+          <h1 className="display" style={{ fontSize: 48 }}>That category was not found.</h1>
           <SpecularButton tone="primary" to="/shop">Back to catalog</SpecularButton>
         </div>
       </div>
@@ -65,7 +65,7 @@ export function SearchPage() {
       <header className="page-hero">
         <p className="eyebrow">Search</p>
         <h1 className="display">{query.trim() ? `Results for “${query.trim()}”` : "Search the catalogue"}</h1>
-        <p className="lede">Search compares your words with the sample catalogue in this browser.</p>
+        <p className="lede">Search the live catalogue by name or code.</p>
       </header>
       {!query.trim() ? (
         <div className="empty">
@@ -78,7 +78,7 @@ export function SearchPage() {
       ) : results.length === 0 ? (
         <div className="empty">
           <h2 className="display" style={{ fontSize: 40 }}>No matching records.</h2>
-          <p>That record is not in the wireframe catalogue.</p>
+          <p>No products matched that search.</p>
         </div>
       ) : (
         <CatalogBrowser
@@ -112,7 +112,7 @@ export function ProductPage() {
     return (
       <div className="wrap" style={{ padding: "32px 0 64px" }}>
         <div className="error-box">
-          <h1 className="display" style={{ fontSize: 48 }}>That product is not in the sample catalogue.</h1>
+          <h1 className="display" style={{ fontSize: 48 }}>That product was not found.</h1>
           <SpecularButton tone="primary" to="/shop">Back to catalog</SpecularButton>
         </div>
       </div>
@@ -193,7 +193,7 @@ export function ProductPage() {
               tone="primary"
               type="button"
               disabled={variation.stockQuantity <= 0}
-              onClick={() => setNote(cart.addItem(product, variation.id, quantity) ?? "Added to the cart in this browser.")}
+              onClick={() => setNote(cart.addItem(product, variation.id, quantity) ?? "Added to your cart.")}
             >
               Add to cart
             </SpecularButton>
@@ -201,7 +201,7 @@ export function ProductPage() {
           </div>
           {note ? <p className="notice">{note}</p> : null}
           {productStock(product) === "out-of-stock" ? (
-            <p className="notice">This sample is intentionally out of stock in the wireframe. Purchase actions stay disabled. No backorder or fulfilment promise is implied.</p>
+            <p className="notice">This product is currently out of stock. Purchase actions stay disabled.</p>
           ) : null}
           <div className="prose">
             <h2 className="display" style={{ fontSize: 32, marginBottom: 8 }}>About this record</h2>

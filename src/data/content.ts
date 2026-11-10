@@ -147,34 +147,34 @@ export const affiliates: Affiliate[] = [
 ]
 
 export const shippingMethods = [
-  { id: "ship_standard", label: "Standard — rate not quoted" },
-  { id: "ship_express", label: "Express — rate not quoted" },
+  { id: "ship_standard", label: "Standard shipping — rate confirmed after order" },
+  { id: "ship_express", label: "Express shipping — rate confirmed after order" },
 ]
 
 export const faqs = [
   {
     id: "faq_prices",
-    question: "How should prices on this wireframe be read?",
+    question: "How are catalogue prices shown?",
     answer:
-      "Prices are sample figures for layout review. They are not a quote, and the cart total is a provisional calculation in this browser.",
+      "Prices shown on product pages and in the cart are the current catalogue prices. Shipping is confirmed after you place the order.",
   },
   {
     id: "faq_payment",
-    question: "Does checkout take payment?",
+    question: "Does checkout take payment yet?",
     answer:
-      "No. The payment area is an integration placeholder. Card numbers and other payment credentials are not collected, and placing a demonstration order does not charge anyone.",
+      "Not yet. You can place an order and it is saved on your account as awaiting payment. Card payment will be collected once our payment provider is connected.",
   },
   {
     id: "faq_products",
-    question: "Where will approved product information appear?",
+    question: "What products are listed?",
     answer:
-      "Names, descriptions, options, and research-use statements on product pages will be replaced with client-approved catalogue content. The current text is placeholder copy.",
+      "The live catalogue is managed in the LotWise Labs admin panel. Product names, options, and stock update from there.",
   },
   {
     id: "faq_contact",
     question: "How do I contact LotWise Labs?",
     answer:
-      "Official email, phone, and business address have not been added yet. The contact page collects a message only as a form demonstration and does not send it.",
+      "Use the WhatsApp button on the site or the contact page to reach the LotWise Labs team.",
   },
 ]
 
@@ -183,19 +183,19 @@ export const policies = [
     slug: "terms",
     title: "Terms",
     summary:
-      "Client-approved terms have not been provided. The headings below show the intended structure only.",
+      "Using the LotWise Labs storefront means you agree to place orders for research use as described on product pages.",
     sections: [
       {
         heading: "Using the store",
-        body: "Approved terms of use will appear in this section.",
+        body: "You may browse the catalogue, create an account, and place orders. Account credentials must be kept confidential.",
       },
       {
         heading: "Orders",
-        body: "Approved order terms will appear in this section. Demonstration checkout does not create an order.",
+        body: "Placing an order creates a pending-payment order on your account. Payment is collected when the payment provider is connected. LotWise Labs may confirm shipping separately.",
       },
       {
         heading: "Research use",
-        body: "Any research-use or purchasing-eligibility statement must be supplied by LotWise Labs and reviewed for applicable requirements before it is published.",
+        body: "Catalogue products are offered for research use only, as stated on product pages.",
       },
     ],
   },
@@ -203,15 +203,15 @@ export const policies = [
     slug: "privacy",
     title: "Privacy",
     summary:
-      "A privacy notice has not been provided. This page does not describe a real data practice.",
+      "LotWise Labs stores account, order, and referral information needed to run the storefront.",
     sections: [
       {
-        heading: "Information the future store may collect",
-        body: "Account, order, and contact fields will need an approved privacy notice before launch.",
+        heading: "Information we collect",
+        body: "Account name and email, order contact and shipping details, cart activity in your browser, and referral visits when you open a referral link.",
       },
       {
-        heading: "This wireframe",
-        body: "Catalogue forms stay in this browser. Account registration, sign-in, referral visits, and signed-in demonstration orders are sent to the referral service for this project.",
+        heading: "How it is used",
+        body: "We use this information to authenticate you, fulfil orders, operate the referral program, and improve the storefront.",
       },
     ],
   },
@@ -219,19 +219,19 @@ export const policies = [
     slug: "referral",
     title: "Referral terms",
     summary:
-      "Referral program terms have not been supplied by LotWise Labs. The program records visits and new accounts. It does not promise a reward unless an administrator configures one.",
+      "The referral program records visits and new accounts. Rewards apply only when an administrator configures them.",
     sections: [
       {
         heading: "Attribution",
-        body: "Opening a referral link stores an anonymous visit. If the same browser opens another valid link before creating an account, the latest link is the one that is kept. Creating an account locks that relationship. Later links do not move it. A customer cannot refer their own account, and an existing account is not attached to a new referral.",
+        body: "Opening a referral link stores an anonymous visit. If the same browser opens another valid link before creating an account, the latest link is kept. Creating an account locks that relationship. Later links do not move it. A customer cannot refer their own account, and an existing account is not attached to a new referral.",
       },
       {
         heading: "Qualification",
-        body: "Qualification follows the rule stored for the program: either a new account, or a paid order that meets the configured minimum. Clicks alone do not qualify a referral. Unpaid, failed, cancelled, and refunded orders do not qualify. A waiting period or manual review, when configured, keeps the reward pending.",
+        body: "Qualification follows the rule stored for the program: either a new account, or a paid order that meets the configured minimum. Clicks alone do not qualify. Unpaid, failed, cancelled, and refunded orders do not qualify. A waiting period or manual review, when configured, keeps the reward pending.",
       },
       {
         heading: "Rewards",
-        body: "No discount, store credit, or other reward is offered until an administrator sets the type and amount. Each qualifying relationship can produce one referrer reward and one friend benefit. A later refund reverses a reward that was created from that order.",
+        body: "No discount or other reward is offered until an administrator sets the type and amount. Each qualifying relationship can produce one referrer reward and one friend benefit.",
       },
     ],
   },
@@ -239,15 +239,15 @@ export const policies = [
     slug: "shipping-returns",
     title: "Shipping and returns",
     summary:
-      "Shipping and returns copy has not been provided. Rates are not quoted anywhere in this wireframe.",
+      "Shipping rates are confirmed after you place an order. Return conditions follow LotWise Labs fulfilment policy.",
     sections: [
       {
         heading: "Shipping",
-        body: "Carrier options, regions, and rates will replace the checkout shipping placeholder after they are confirmed.",
+        body: "Choose a shipping preference at checkout. Exact carrier rates and timing are confirmed with you after the order is placed.",
       },
       {
         heading: "Returns",
-        body: "Return conditions will be published here only after they are approved. None are offered by this wireframe.",
+        body: "Contact LotWise Labs about returns. Eligibility depends on the product and fulfilment status.",
       },
     ],
   },

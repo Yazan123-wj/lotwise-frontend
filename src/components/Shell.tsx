@@ -343,7 +343,7 @@ export function StoreLayout() {
               {cart.lines.length === 0 ? (
                 <>
                   <p className="display" style={{ fontSize: 28 }}>Your cart is empty.</p>
-                  <p className="lede">Add a record from the catalogue. Prices are sample figures and are not reserved.</p>
+                  <p className="lede">Add a product from the catalogue to get started.</p>
                   <SpecularButton tone="primary" to="/shop" onClick={() => setOpen(null)} style={{ marginTop: 16 }}>Browse catalogue</SpecularButton>
                 </>
               ) : (
@@ -385,7 +385,7 @@ export function AdminFrame({ children }: { children: React.ReactNode }) {
     <div className="admin">
       <aside className="admin-side">
         <Link to="/" className="logo" style={{ marginBottom: 16 }}><img src="/brand/lotwise-logo.png" alt="LotWise Labs" style={{ filter: "brightness(0) invert(1)", height: 40 }} /></Link>
-        <p className="meta" style={{ color: "rgba(255,255,255,.65)", padding: "0 10px 12px" }}>View only. Refresh restores the sample files.</p>
+        <p className="meta" style={{ color: "rgba(255,255,255,.65)", padding: "0 10px 12px" }}>Admin catalogue tools live at admin.lotwiselabs.com.</p>
         <NavLink to="/admin" end>Dashboard</NavLink>
         <NavLink to="/admin/products">Products</NavLink>
         <NavLink to="/admin/categories">Categories</NavLink>

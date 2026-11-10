@@ -14,9 +14,9 @@ import { mediaSrc } from "../lib/media.ts"
 
 const steps = [
   { n: "01", title: "Explore", body: "Open the catalog and filter by area.", to: "/shop", label: "Open the catalog" },
-  { n: "02", title: "Review", body: "Open a record and its sample options.", to: "/products/sample-vial-lw-01", label: "Open a record" },
-  { n: "03", title: "Add", body: "Put the record in the cart on this browser.", to: "/cart", label: "View the cart" },
-  { n: "04", title: "Confirm", body: "Checkout writes a demonstration receipt. It does not take payment.", to: "/checkout", label: "Go to checkout" },
+  { n: "02", title: "Review", body: "Open a product and choose a size.", to: "/shop", label: "Browse products" },
+  { n: "03", title: "Add", body: "Add items to your cart.", to: "/cart", label: "View the cart" },
+  { n: "04", title: "Order", body: "Sign in and place your order. Payment comes next.", to: "/checkout", label: "Go to checkout" },
 ]
 
 export function HomePage() {
@@ -64,7 +64,7 @@ export function HomePage() {
           <div className="vial-cluster">
             <img className="vial-back vial-back-left" src={mediaSrc("/images/hero-vial.png")} alt="" decoding="async" />
             <img className="vial-back vial-back-right" src={mediaSrc("/images/hero-vial.png")} alt="" decoding="async" />
-            <img className="vial-front" src={mediaSrc("/images/hero-vial.png")} alt="Sample catalogue vial" fetchPriority="high" decoding="async" />
+            <img className="vial-front" src={mediaSrc("/images/hero-vial.png")} alt="LotWise Labs research vial" fetchPriority="high" decoding="async" />
           </div>
         </AnimatedContent>
       </section>
@@ -115,17 +115,17 @@ export function HomePage() {
           <div>
             <p className="eyebrow">Catalogue</p>
             <h2 className="display">Built around the records.</h2>
-            <p className="lede" style={{ marginTop: 16 }}>LotWise lists sample records for review. Names, options, and prices on these pages are catalogue figures.</p>
+            <p className="lede" style={{ marginTop: 16 }}>LotWise Labs lists research peptides with clear options, certificates, and checkout on your account.</p>
             <div className="point-list">
-              <article><strong>01</strong><div><h3>Records</h3><p className="meta">Each item has a name, a code, and at least one sample option.</p></div></article>
-              <article><strong>02</strong><div><h3>Files</h3><p className="meta">The Janoshik test report sits on the certificates page, with a link to verify it.</p></div></article>
-              <article><strong>03</strong><div><h3>Cart</h3><p className="meta">A record can be added here, then reviewed at checkout as a demonstration.</p></div></article>
+              <article><strong>01</strong><div><h3>Catalogue</h3><p className="meta">Each product has a name, code, and available sizes.</p></div></article>
+              <article><strong>02</strong><div><h3>Certificates</h3><p className="meta">Janoshik reports sit on the certificates page, with a verify link.</p></div></article>
+              <article><strong>03</strong><div><h3>Orders</h3><p className="meta">Add to cart, sign in, and place an order awaiting payment.</p></div></article>
             </div>
             <SpecularButton tone="ghost" to="/about" style={{ marginTop: 18 }}>About LotWise</SpecularButton>
           </div>
           <figure className="figure">
             <img src={mediaSrc("/images/hero-vial.png")} alt="" loading="lazy" decoding="async" />
-            <figcaption>Fig. 01 — {sample?.name ?? "Sample record"} · Research use only</figcaption>
+            <figcaption>{sample?.name ?? "LotWise Labs"} · Research use only</figcaption>
           </figure>
         </div>
       </section>
@@ -138,7 +138,7 @@ export function HomePage() {
             <div>
               <p className="eyebrow">Selected records</p>
               <h2 className="display">The catalogue</h2>
-              <p className="lede">Names, options, and sample prices — set out plainly, without promotional claims.</p>
+              <p className="lede">Names, options, and prices — set out plainly for research use.</p>
             </div>
             <SpecularButton tone="primary" to="/shop">All records</SpecularButton>
           </div>
@@ -223,7 +223,7 @@ export function HomePage() {
               <input id="home-code" value={code} placeholder="LW-01" onChange={(event) => setCode(event.target.value)} />
               <SpecularButton tone="primary" type="submit">Find record</SpecularButton>
             </form>
-            {lookup === "" ? <p className="notice">That record is not in the wireframe catalogue.</p> : null}
+            {lookup === "" ? <p className="notice">That record is not in the catalogue.</p> : null}
             {lookup ? (
               <p className="notice">
                 {visibleProducts().find((item) => item.slug === lookup)?.name} · {categoryName(visibleProducts().find((item) => item.slug === lookup)?.categorySlug ?? "")}
@@ -242,7 +242,7 @@ export function HomePage() {
         <div className="wrap">
           <p className="eyebrow">How it works</p>
           <h2 className="display">From the catalogue to checkout</h2>
-          <p className="lede" style={{ marginBottom: 22 }}>Four steps on this site, from the list to a demonstration receipt.</p>
+          <p className="lede" style={{ marginBottom: 22 }}>Four steps from the catalogue to your order.</p>
           <AnimatedContent className="steps" stagger={0.08} distance={50} duration={0.7} ease="power3.out">
             {steps.map((step) => (
               <article className="step" key={step.n}>

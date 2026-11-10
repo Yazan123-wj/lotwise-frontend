@@ -18,6 +18,12 @@ type AccountOrder = {
   total: number
   createdAt: string
   paidAt: string | null
+  contactName?: string
+  contactEmail?: string
+  contactPhone?: string
+  shippingMethod?: string
+  shippingAddress?: Address
+  items?: Array<{ sku: string; name: string; quantity: number; unitPrice: number }>
 }
 
 function statusLabel(status: string) {
@@ -499,7 +505,27 @@ export function OrderDetailPage() {
         <article className="account-panel">
           <h2>{order.orderNumber}</h2>
           <p className="meta">{formatDate(order.createdAt)} · {statusLabel(order.status)}</p>
-          <p className="meta">Subtotal {formatMoney(order.subtotal)}</p>
+          {order.contactName ? (
+            <p className="meta" style={{ marginTop: 12 }}>
+              {order.contactName}<br />{order.contactEmail}<br />{order.contactPhone}
+            </p>
+          ) : null}
+          {order.shippingAddress?.line1 ? (
+            <p className="meta" style={{ marginTop: 12 }}>
+              {order.shippingAddress.line1}{order.shippingAddress.line2 ? `, ${order.shippingAddress.line2}` : ""}
+              <br />{order.shippingAddress.city}, {order.shippingAddress.region} {order.shippingAddress.postalCode}
+              <br />{order.shippingAddress.country}
+            </p>
+          ) : null}
+          {order.shippingMethod ? <p className="meta">{order.shippingMethod}</p> : null}
+          {order.items && order.items.length > 0 ? (
+            <div style={{ marginTop: 16 }}>
+              {order.items.map((item, index) => (
+                <p key={`${item.sku}-${index}`}>{item.name} · {item.sku} × {item.quantity} · {formatMoney(item.unitPrice * item.quantity)}</p>
+              ))}
+            </div>
+          ) : null}
+          <p className="meta" style={{ marginTop: 12 }}>Subtotal {formatMoney(order.subtotal)}</p>
           {order.discountAmount > 0 ? <p className="meta">Discount {formatMoney(order.discountAmount)}{order.discountCode ? ` · ${order.discountCode}` : ""}</p> : null}
           <p><strong>{formatMoney(order.total)}</strong></p>
         </article>

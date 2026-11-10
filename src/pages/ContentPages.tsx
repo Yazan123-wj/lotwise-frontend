@@ -86,7 +86,7 @@ export function PolicyPage() {
     return (
       <div className="wrap" style={{ padding: "32px 0" }}>
         <div className="error-box">
-          <h1 className="display" style={{ fontSize: 42 }}>That policy route is not part of the wireframe.</h1>
+          <h1 className="display" style={{ fontSize: 42 }}>That policy page was not found.</h1>
           <Link to="/policies/terms">Terms</Link>
         </div>
       </div>
@@ -146,7 +146,7 @@ export function QualityPage() {
           <input aria-label="Catalogue code" value={code} onChange={(event) => setCode(event.target.value)} placeholder="LW-01" />
           <SpecularButton tone="primary" type="submit">Find record</SpecularButton>
         </div>
-        {result === "" ? <p className="notice">That record is not in the wireframe catalogue.</p> : null}
+        {result === "" ? <p className="notice">That record is not in the catalogue.</p> : null}
         {product ? <p className="notice">{product.name} · {product.baseSku}. <Link to={`/products/${product.slug}`}>View record</Link></p> : null}
       </form>
     </div>

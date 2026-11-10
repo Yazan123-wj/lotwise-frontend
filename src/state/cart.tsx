@@ -14,14 +14,6 @@ const CART_KEY = "lotwise-cart"
 const RECEIPT_KEY = "lotwise-receipt"
 const ADDRESS_KEY = "lotwise-addresses"
 
-type CheckoutInput = {
-  name: string
-  email: string
-  phone: string
-  shippingAddress: Address
-  shippingMethodLabel: string
-}
-
 type CartValue = {
   lines: CartLine[]
   count: number
@@ -39,7 +31,7 @@ type CartValue = {
   referral: string | null
   setReferral: (code: string) => void
   receipt: Receipt | null
-  placeDemonstration: (input: CheckoutInput) => Receipt | null
+  completeOrder: (receipt: Receipt) => void
   addresses: Address[]
   addAddress: (address: Address) => void
 }
@@ -145,38 +137,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setReferralState(next || null)
       },
       receipt,
-      placeDemonstration: (input) => {
-        if (lines.length === 0) return null
-        const next: Receipt = {
-          reference: `LW-PREVIEW-${Date.now().toString(36).toUpperCase()}`,
-          createdAt: new Date().toISOString(),
-          name: input.name.trim(),
-          email: input.email.trim(),
-          phone: input.phone.trim(),
-          shippingAddress: input.shippingAddress,
-          shippingMethodLabel: input.shippingMethodLabel,
-          items: lines.map((line) => ({
-            id: line.key,
-            productId: line.productId,
-            variationId: line.variationId,
-            name: line.name,
-            sku: line.sku,
-            variationLabel: line.variationLabel,
-            quantity: line.quantity,
-            unitPrice: line.unitPrice,
-          })),
-          subtotal,
-          discountAmount,
-          discountCode: appliedCode,
-          total: Math.max(0, subtotal - discountAmount),
-          referral,
-          note: "Demonstration confirmation only. No payment was taken and no order was stored.",
-        }
+      completeOrder: (next) => {
         sessionStorage.setItem(RECEIPT_KEY, JSON.stringify(next))
         setReceipt(next)
         setLines([])
         setDiscountInput("")
-        return next
+        setServerDiscount(null)
       },
       addresses,
       addAddress: (address) => {
@@ -187,7 +153,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         })
       },
     }
-  }, [addresses, appliedCode, discountAmount, discountInput, discountMessage, lines, receipt, referral, subtotal])
+  }, [addresses, appliedCode, discountAmount, discountInput, discountMessage, lines, receipt, referral, serverDiscount, subtotal])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
