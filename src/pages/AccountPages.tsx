@@ -95,19 +95,38 @@ export function AccountLayout() {
     else if (item.right > navBox.right) nav.scrollLeft += item.right - navBox.right + 14
   }, [pathname])
 
+  const initial = session.customer?.name?.trim()?.charAt(0)?.toUpperCase() || "L"
+
   return (
     <div className="wrap account-page">
       <header className="account-hero">
         <p className="eyebrow">Account</p>
-        <h1>{session.customer ? session.customer.name : "Your account"}</h1>
-        <p className="lede">
-          {session.customer
-            ? session.customer.email
-            : "Sign in to manage your profile, orders, and referrals."}
-        </p>
+        {session.customer ? (
+          <div className="account-hero__user">
+            <span className="account-avatar" aria-hidden="true">{initial}</span>
+            <div>
+              <h1>{session.customer.name}</h1>
+              <p className="lede">{session.customer.email}</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1>Sign in</h1>
+            <p className="lede">Access your profile, orders, and referral link.</p>
+          </>
+        )}
       </header>
       <div className="account">
         <aside className="account-side">
+          {session.customer ? (
+            <div className="account-side__user">
+              <span className="account-avatar account-avatar--sm" aria-hidden="true">{initial}</span>
+              <div>
+                <strong>{session.customer.name}</strong>
+                <span>{session.customer.email}</span>
+              </div>
+            </div>
+          ) : null}
           <nav className="side-nav" aria-label="Account" ref={navRef}>
             {links.map((link) => (
               <NavLink key={link.to} to={link.to} end={link.end}>{link.label}</NavLink>
@@ -162,53 +181,61 @@ function useAccountOrders() {
 
 export function OverviewPage() {
   const session = useSession()
+  const navigate = useNavigate()
   const { orders, error, loading } = useAccountOrders()
+
+  useEffect(() => {
+    if (session.ready && !session.customer) navigate("/account/sign-in", { replace: true })
+  }, [navigate, session.customer, session.ready])
+
+  if (!session.ready) return <p className="meta">Loading your account…</p>
+  if (!session.customer) return null
+
   return (
-    <RequireAuth>
-      {session.customer ? (
-        <div className="account-panel">
-          <div className="account-panel__head">
-            <div>
-              <p className="eyebrow">Overview</p>
-              <h2>Welcome back</h2>
-              <p className="meta">Signed in on this browser.</p>
-            </div>
-            <SpecularButton tone="ghost" to="/account/referrals">Refer a friend</SpecularButton>
-          </div>
-          <div className="account-stats">
-            <article className="account-stat">
-              <span>Name</span>
-              <strong>{session.customer.name}</strong>
-            </article>
-            <article className="account-stat">
-              <span>Email</span>
-              <strong className="account-stat__email">{session.customer.email}</strong>
-            </article>
-            <article className="account-stat">
-              <span>Orders</span>
-              <strong>{loading ? "…" : orders.length}</strong>
-            </article>
-          </div>
-          <div className="order-head">
-            <h2>Recent orders</h2>
-            <Link to="/account/orders">All orders</Link>
-          </div>
-          {error ? <p className="notice">{error}</p> : null}
-          {loading ? <p className="meta">Loading orders…</p> : null}
-          {!loading && orders.length === 0 ? (
-            <div className="account-empty account-empty--inset">
-              <p>No orders yet.</p>
-              <SpecularButton tone="primary" to="/shop">Browse the catalogue</SpecularButton>
-            </div>
-          ) : null}
-          {!loading && orders.length > 0 ? (
-            <div className="order-list">
-              {orders.slice(0, 3).map((order) => <OrderCard key={order.id} order={order} />)}
-            </div>
-          ) : null}
+    <div className="account-panel">
+      <div className="account-panel__head">
+        <div>
+          <p className="eyebrow">Overview</p>
+          <h2>Welcome back</h2>
+          <p className="meta">You are signed in to LotWise Labs.</p>
+        </div>
+        <div className="account-panel__actions">
+          <SpecularButton tone="ghost" to="/shop">Shop</SpecularButton>
+          <SpecularButton tone="primary" to="/account/referrals">Refer a friend</SpecularButton>
+        </div>
+      </div>
+      <div className="account-stats">
+        <article className="account-stat">
+          <span>Name</span>
+          <strong>{session.customer.name}</strong>
+        </article>
+        <article className="account-stat">
+          <span>Email</span>
+          <strong className="account-stat__email">{session.customer.email}</strong>
+        </article>
+        <article className="account-stat">
+          <span>Orders</span>
+          <strong>{loading ? "…" : String(orders.length)}</strong>
+        </article>
+      </div>
+      <div className="order-head">
+        <h2>Recent orders</h2>
+        <Link to="/account/orders">All orders</Link>
+      </div>
+      {error ? <p className="notice">{error}</p> : null}
+      {loading ? <p className="meta">Loading orders…</p> : null}
+      {!loading && orders.length === 0 ? (
+        <div className="account-empty account-empty--inset">
+          <p>No orders yet.</p>
+          <SpecularButton tone="primary" to="/shop">Browse the catalogue</SpecularButton>
         </div>
       ) : null}
-    </RequireAuth>
+      {!loading && orders.length > 0 ? (
+        <div className="order-list">
+          {orders.slice(0, 3).map((order) => <OrderCard key={order.id} order={order} />)}
+        </div>
+      ) : null}
+    </div>
   )
 }
 
