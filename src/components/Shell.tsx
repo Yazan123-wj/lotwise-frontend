@@ -330,7 +330,6 @@ export function StoreLayout() {
       </a>
 
       <div className="dock" aria-label="Shortcuts">
-        <button type="button" aria-expanded={menuOpen} onPointerDown={(event) => event.stopPropagation()} onClick={() => setMenuOpen((value) => !value)}>Menu</button>
         <button type="button" onClick={() => { setMenuOpen(false); setOpen("search") }}>Search</button>
         <Link to="/account">Account</Link>
         <button type="button" onClick={() => { setCartLeaving(false); setOpen("cart") }}>Cart <span className="dock-count">{cart.count}</span></button>
