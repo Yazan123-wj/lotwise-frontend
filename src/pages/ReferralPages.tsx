@@ -104,7 +104,7 @@ export function ReferralDashboardPage() {
     return (
       <div className="panel">
         <h2 className="display" style={{ fontSize: 40 }}>Sign in to refer a friend</h2>
-        <p className="lede">Your referral link is created for your account and stored with the referral service. The sample preview does not issue a link.</p>
+        <p className="lede">Your referral link is created when you sign in. Sign in to open it.</p>
         <div className="buy-row" style={{ marginTop: 16 }}>
           <SpecularButton tone="primary" to="/account/sign-in">Sign in</SpecularButton>
           <SpecularButton tone="ghost" to="/account/register">Create account</SpecularButton>

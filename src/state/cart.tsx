@@ -11,7 +11,6 @@ import { lineFor, quoteDiscount } from "../lib/catalog.ts"
 import type { Address, CartLine, Product, Receipt } from "../types.ts"
 
 const CART_KEY = "lotwise-cart"
-const PREVIEW_KEY = "lotwise-preview"
 const RECEIPT_KEY = "lotwise-receipt"
 const ADDRESS_KEY = "lotwise-addresses"
 
@@ -39,8 +38,6 @@ type CartValue = {
   removeLine: (key: string) => void
   referral: string | null
   setReferral: (code: string) => void
-  preview: boolean
-  setPreview: (on: boolean) => void
   receipt: Receipt | null
   placeDemonstration: (input: CheckoutInput) => Receipt | null
   addresses: Address[]
@@ -71,7 +68,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [discountInput, setDiscountInput] = useState("")
   const [serverDiscount, setServerDiscount] = useState<{ code: string; amount: number; message: string | null; applied: string | null } | null>(null)
   const [referral, setReferralState] = useState<string | null>(null)
-  const [preview, setPreviewState] = useState(false)
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [addresses, setAddresses] = useState<Address[]>([])
   const [ready, setReady] = useState(false)
@@ -85,7 +81,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setLines(stored.lines.map(refreshLine).filter((line): line is CartLine => line !== null))
       setDiscountInput(stored.discountInput ?? "")
     }
-    setPreviewState(localStorage.getItem(PREVIEW_KEY) === "1")
+    localStorage.removeItem("lotwise-preview")
     setReceipt(readJson<Receipt>(sessionStorage, RECEIPT_KEY))
     setAddresses(readJson<Address[]>(sessionStorage, ADDRESS_KEY) ?? [])
     setReady(true)
@@ -148,11 +144,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const next = code.trim()
         setReferralState(next || null)
       },
-      preview,
-      setPreview: (on) => {
-        localStorage.setItem(PREVIEW_KEY, on ? "1" : "0")
-        setPreviewState(on)
-      },
       receipt,
       placeDemonstration: (input) => {
         if (lines.length === 0) return null
@@ -196,7 +187,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         })
       },
     }
-  }, [addresses, appliedCode, discountAmount, discountInput, discountMessage, lines, preview, receipt, referral, subtotal])
+  }, [addresses, appliedCode, discountAmount, discountInput, discountMessage, lines, receipt, referral, subtotal])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
