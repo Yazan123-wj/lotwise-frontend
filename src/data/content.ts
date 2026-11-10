@@ -255,22 +255,13 @@ export const policies = [
 
 export const certificates = [
   {
-    id: "coa",
-    title: "Certificate of Analysis",
-    image: "/images/certificates/analysis.svg",
-    note: "Document LW-COA. Test results are not printed on this file.",
-  },
-  {
-    id: "quality",
-    title: "Quality certificate",
-    image: "/images/certificates/quality.svg",
-    note: "Document type only. Certificate numbers are not published here.",
-  },
-  {
-    id: "batch",
-    title: "Batch certificate",
-    image: "/images/certificates/batch.svg",
-    note: "Document type only. This is not a laboratory batch lookup.",
+    id: "janoshik-240241",
+    title: "Janoshik test report #240241",
+    image: "/images/certificates/janoshik-240241.png",
+    alt: "Janoshik test report 240241 for sample RETATURIDE-Lotwiselabs, batch RTD-26-001-05",
+    note: "RETATURIDE-Lotwiselabs · Batch RTD-26-001-05",
+    result: "Retatrutide 10.34 mg · Purity 99.859%",
+    href: "https://verify.janoshik.com/tests/240241-RETATURIDELotwiselabs_A1SM24X2LPSJ",
   },
 ]
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
-import { categories } from "../data/content.ts"
+import { categories } from "../lib/live.ts"
 import {
   categoryName,
   countInCategory,
@@ -98,8 +98,13 @@ export function ProductCard({ product }: { product: Product }) {
         <h3>{product.name}</h3>
       </Link>
       <p className="meta">{product.baseSku} · Research use only</p>
-      <p className="price">{priceLabel(product)} <span className="meta">/ record</span></p>
-      <p className="meta">Set of 10 · {formatMoney(minPrice(product) * 10)}</p>
+      <p className="price">{priceLabel(product)} <span className="meta">/ size</span></p>
+      <p className="meta">
+        {product.variations.length > 1
+          ? `Sizes ${product.variations.map((item) => item.label).join(" · ")}`
+          : product.variations[0]?.label || "One size"}
+        {" · "}Set of 10 · {formatMoney(minPrice(product) * 10)}
+      </p>
       <p className={status === "out-of-stock" ? "stock-out" : status === "low-stock" ? "stock-low" : "stock-in"}>{stockLabel(status)}</p>
       <div className="box-foot">
         <button className="text-btn" type="button" disabled={!available} onClick={add}>

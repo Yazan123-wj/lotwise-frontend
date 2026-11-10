@@ -1,12 +1,24 @@
 import { useEffect, useId, useState, type AnimationEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
+import { createPortal } from "react-dom"
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom"
-import { categories, companyLinks, policyLinks } from "../data/content.ts"
+import { companyLinks, policyLinks } from "../data/content.ts"
+import { announcement, categories, whatsapp } from "../lib/live.ts"
 import AnimatedContent from "./AnimatedContent.tsx"
 import CardNav from "./CardNav.tsx"
 import SpecularButton from "./SpecularButton.tsx"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { countInCategory, formatMoney, searchProducts, visibleProducts } from "../lib/catalog.ts"
 import { useCart } from "../state/cart.tsx"
+
+const AGE_KEY = "lotwise-entered"
+
+function hasEntered() {
+  try {
+    return localStorage.getItem(AGE_KEY) === "1"
+  } catch {
+    return false
+  }
+}
 
 function RouterLink({
   href,
@@ -65,11 +77,10 @@ export function StoreLayout() {
   const [cartLeaving, setCartLeaving] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [query, setQuery] = useState("")
-  const [ageOk, setAgeOk] = useState(true)
+  const [ageOk, setAgeOk] = useState(hasEntered)
   const searchId = useId()
   const home = location.pathname === "/"
   const ghost = home && !solid
-  const gated = /^\/(shop|search|categories|products)(\/|$)/.test(location.pathname)
 
   useEffect(() => {
     const onScroll = () => setSolid(!home || window.scrollY > 12)
@@ -82,9 +93,17 @@ export function StoreLayout() {
     setOpen(null)
     setCartLeaving(false)
     setMenuOpen(false)
-    setAgeOk(sessionStorage.getItem("lotwise-age") === "1")
     ScrollTrigger.refresh()
   }, [location.pathname])
+
+  useEffect(() => {
+    if (ageOk) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [ageOk])
 
   useEffect(() => {
     if (!open) return
@@ -131,7 +150,15 @@ export function StoreLayout() {
     <div className={home ? "store-home" : "store"}>
       <a className="skip" href="#main">Skip to content</a>
       <div className={ghost ? "topbar topbar-ghost" : "topbar topbar-solid"}>
-        <div className="announce">Listed for catalogue review · Sample figures</div>
+        <div className="announce" aria-label={announcement.join(". ")}>
+          <div className="announce-track">
+            {[0, 1].map((copy) => (
+              <p className="announce-group" key={copy} aria-hidden={copy === 1 || undefined}>
+                {announcement.map((line) => <span key={line}>{line}</span>)}
+              </p>
+            ))}
+          </div>
+        </div>
         <header className="nav">
           <CardNav
             logo="/brand/lotwise-logo.png"
@@ -229,29 +256,7 @@ export function StoreLayout() {
       </div>
 
       <main id="main">
-        {gated && !ageOk ? (
-          <div className="gate wrap">
-            <AnimatedContent trigger="mount" distance={50} duration={0.7} ease="power3.out">
-            <div className="panel">
-              <p className="eyebrow">Catalogue review</p>
-              <h1 className="display" style={{ fontSize: "48px", margin: "10px 0" }}>You must be at least 18 to view this catalogue.</h1>
-              <p className="lede">Records on this site are for catalogue review. They are not offered for human or veterinary use.</p>
-              <p className="notice">Entering confirms the catalogue is for research review only.</p>
-              <SpecularButton
-                tone="primary"
-                type="button"
-                style={{ marginTop: 16 }}
-                onClick={() => {
-                  sessionStorage.setItem("lotwise-age", "1")
-                  setAgeOk(true)
-                }}
-              >
-                Enter catalogue
-              </SpecularButton>
-            </div>
-            </AnimatedContent>
-          </div>
-        ) : home ? (
+        {home ? (
           <Outlet />
         ) : (
           <AnimatedContent key={location.pathname} distance={100} duration={0.8} ease="power3.out" threshold={0.08}>
@@ -287,6 +292,42 @@ export function StoreLayout() {
         </AnimatedContent>
         <div className="wrap legal">© 2026 LotWise Labs.</div>
       </footer>
+
+      {!ageOk ? createPortal(
+        <div className="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-title">
+          <div className="panel">
+            <p className="eyebrow">Age check</p>
+            <h1 id="age-title" className="display">You must be at least 18 to enter this site.</h1>
+            <p className="age-statement">Research Use Only — All products sold on this website are intended for laboratory research purposes only. These products are not intended for human or veterinary use, consumption, diagnosis, treatment, or prevention of any disease. The products have not been evaluated or approved by the U.S. Food and Drug Administration (FDA). By purchasing, the customer agrees that all materials will be used solely for lawful research by qualified professionals and in compliance with applicable laws and regulations.</p>
+            <div className="age-actions">
+              <SpecularButton
+                tone="ghost"
+                type="button"
+                onClick={() => { window.location.replace("https://www.google.com") }}
+              >
+                No, I'm not
+              </SpecularButton>
+              <SpecularButton
+                tone="primary"
+                type="button"
+                onClick={() => {
+                  localStorage.setItem(AGE_KEY, "1")
+                  setAgeOk(true)
+                }}
+              >
+                I am 18 or older
+              </SpecularButton>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      ) : null}
+
+      <a className="whatsapp" href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M20.5 3.5A11 11 0 0 0 2.1 17.8L1 23l5.3-1.1A11 11 0 0 0 12 23a11 11 0 0 0 8.5-19.5zM12 21a9 9 0 0 1-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 1 1 12 21zm5-6.8c-.3-.1-1.6-.8-1.8-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.9 1.1-.1.2-.3.2-.6.1a7.4 7.4 0 0 1-2.2-1.4 8.2 8.2 0 0 1-1.5-1.9c-.2-.3 0-.4.1-.6l.4-.5.2-.3c.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.7 11.7 0 0 0 4.5 4 4.7 4.7 0 0 0 3.2.6 2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.3c-.1-.2-.3-.2-.6-.3z" />
+        </svg>
+      </a>
 
       <div className="dock" aria-label="Shortcuts">
         <button type="button" aria-expanded={menuOpen} onPointerDown={(event) => event.stopPropagation()} onClick={() => setMenuOpen((value) => !value)}>Menu</button>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { ProductCard } from "../components/catalog.tsx"
 import AnimatedContent from "../components/AnimatedContent.tsx"
 import SpecularButton from "../components/SpecularButton.tsx"
-import { categories, certificates } from "../data/content.ts"
+import { categories, certificates, hero } from "../lib/live.ts"
 import {
   categoryName,
   countInCategory,
@@ -51,9 +51,9 @@ export function HomePage() {
     <>
       <section className="hero">
         <AnimatedContent className="hero-copy" stagger={0.08} distance={100} duration={0.8} ease="power3.out">
-          <p className="hero-kicker">LotWise / Catalogue review</p>
-          <h1 className="display">Vial records, reference lots, and kits.</h1>
-          <p className="hero-lede">Listed for review. Prices on this site are sample figures.</p>
+          <p className="hero-kicker">{hero.kicker}</p>
+          <h1 className="display">{hero.title}</h1>
+          <p className="hero-lede">{hero.lede}</p>
           <div className="hero-actions">
             <SpecularButton tone="glass" to="/shop">View catalog</SpecularButton>
             <SpecularButton tone="outline" to="/quality">Certificates</SpecularButton>
@@ -117,7 +117,7 @@ export function HomePage() {
             <p className="lede" style={{ marginTop: 16 }}>LotWise lists sample records for review. Names, options, and prices on these pages are catalogue figures.</p>
             <div className="point-list">
               <article><strong>01</strong><div><h3>Records</h3><p className="meta">Each item has a name, a code, and at least one sample option.</p></div></article>
-              <article><strong>02</strong><div><h3>Files</h3><p className="meta">Certificate images sit on the certificates page. They name the document type.</p></div></article>
+              <article><strong>02</strong><div><h3>Files</h3><p className="meta">The Janoshik test report sits on the certificates page, with a link to verify it.</p></div></article>
               <article><strong>03</strong><div><h3>Cart</h3><p className="meta">A record can be added here, then reviewed at checkout as a demonstration.</p></div></article>
             </div>
             <SpecularButton tone="ghost" to="/about" style={{ marginTop: 18 }}>About LotWise</SpecularButton>
@@ -156,7 +156,7 @@ export function HomePage() {
               <p className="eyebrow">Files</p>
               <h2 className="display">Held with the record.</h2>
             </div>
-            <p className="lede">These files name the document type. Test results are not printed on them.</p>
+            <p className="lede">Janoshik test report for RETATURIDE-Lotwiselabs. The file opens the verification page.</p>
           </div>
           <div className="cert-stage">
             <div className="cert-files">
@@ -166,6 +166,7 @@ export function HomePage() {
                   <span>
                     <strong>{file.title}</strong>
                     <span className="meta">{file.note}</span>
+                    <span className="meta">{file.result}</span>
                   </span>
                 </button>
               ))}
@@ -183,7 +184,9 @@ export function HomePage() {
               >
                 {certificates.map((file) => (
                   <figure className="cert-slide" key={file.id}>
-                    <img src={file.image} alt="" />
+                    <a href={file.href} target="_blank" rel="noopener noreferrer">
+                      <img src={file.image} alt={file.alt} />
+                    </a>
                   </figure>
                 ))}
               </div>
@@ -194,6 +197,7 @@ export function HomePage() {
                 <div className="cert-caption">
                   <strong>{certificates[certIndex]?.title}</strong>
                   <span className="meta">{certificates[certIndex]?.note}</span>
+                  <a href={certificates[certIndex]?.href} target="_blank" rel="noopener noreferrer">Verify on Janoshik</a>
                 </div>
                 <span className="cert-count">{String(certIndex + 1).padStart(2, "0")} / {String(certificates.length).padStart(2, "0")}</span>
                 <button type="button" className="cert-arrow" aria-label="Next certificate" disabled={certIndex === certificates.length - 1} onClick={() => showCertificate(certIndex + 1)}>

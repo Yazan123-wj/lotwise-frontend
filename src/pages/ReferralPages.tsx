@@ -50,8 +50,9 @@ export function ReferralDashboardPage() {
     api<Dashboard>(`/api/account/referral?page=${page}`)
       .then((next) => {
         if (cancel) return
-        setData(next)
-        setDraft((current) => current || `${next.message} ${next.url}`)
+        const shareUrl = `${window.location.origin}/ref/${next.code}`
+        setData({ ...next, url: shareUrl })
+        setDraft((current) => current || `${next.message} ${shareUrl}`)
       })
       .catch((reason: unknown) => {
         if (!cancel) setError(sessionError(reason, "Your referrals could not be loaded."))

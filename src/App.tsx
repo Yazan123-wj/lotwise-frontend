@@ -1,3 +1,4 @@
+import { useEffect, useState, type ReactNode } from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { StoreLayout } from "./components/Shell.tsx"
 import {
@@ -43,16 +44,33 @@ import {
 import { CategoryPage, ProductPage, SearchPage, ShopPage } from "./pages/CatalogPages.tsx"
 import { CartPage, CheckoutPage, ConfirmationPage } from "./pages/CommercePages.tsx"
 import { HomePage } from "./pages/HomePage.tsx"
+import { applyStore } from "./lib/live.ts"
 import { CartProvider } from "./state/cart.tsx"
 import { SessionProvider } from "./state/session.tsx"
 import { ReferralDashboardPage, ReferralInfoPage, ReferralLandingPage } from "./pages/ReferralPages.tsx"
 import { ReferralsAdmin } from "./pages/ReferralAdmin.tsx"
+
+function CatalogueSync({ children }: { children: ReactNode }) {
+  const [version, setVersion] = useState(0)
+  useEffect(() => {
+    fetch("/api/store")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!data?.products?.length) return
+        applyStore(data)
+        setVersion(1)
+      })
+      .catch(() => {})
+  }, [])
+  return <div key={version}>{children}</div>
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <CartProvider>
         <SessionProvider>
+        <CatalogueSync>
         <Routes>
           <Route path="admin/login" element={<AdminLogin />} />
           <Route path="admin" element={<AdminLayout />}>
@@ -109,6 +127,7 @@ export default function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
+        </CatalogueSync>
         </SessionProvider>
       </CartProvider>
     </BrowserRouter>

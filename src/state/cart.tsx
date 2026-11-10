@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { products } from "../data/products.ts"
+import { products } from "../lib/live.ts"
 import { lineFor, quoteDiscount } from "../lib/catalog.ts"
 import type { Address, CartLine, Product, Receipt } from "../types.ts"
 

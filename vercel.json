@@ -1,3 +1,13 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://lotwise-backend-production.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/images/uploads/:path*",
+      "destination": "https://lotwise-backend-production.up.railway.app/images/uploads/:path*"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

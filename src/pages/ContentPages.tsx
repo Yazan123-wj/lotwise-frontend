@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react"
 import { Link, useParams } from "react-router-dom"
-import { certificates, faqs, policies } from "../data/content.ts"
+import { faqs, policies } from "../data/content.ts"
+import { certificates } from "../lib/live.ts"
 import SpecularButton from "../components/SpecularButton.tsx"
 import { productByCode } from "../lib/catalog.ts"
 import { useTitle } from "../lib/useTitle.ts"
@@ -123,14 +124,18 @@ export function QualityPage() {
       <header className="page-hero">
         <p className="eyebrow">Quality</p>
         <h1 className="display">Certificates</h1>
-        <p className="lede">The documents held with the catalogue. Document types are listed here. Certificate numbers and test results are not published.</p>
+        <p className="lede">Janoshik test report for RETATURIDE-Lotwiselabs. Open the file to verify it on Janoshik.</p>
       </header>
-      <div className="price-grid">
+      <div className="cert-list">
         {certificates.map((file) => (
           <article className="cert-card" key={file.id}>
-            <img src={file.image} alt="" />
-            <h2 style={{ marginTop: 12 }}>{file.title}</h2>
+            <h2>{file.title}</h2>
             <p className="meta">{file.note}</p>
+            <p className="meta">{file.result}</p>
+            <a href={file.href} target="_blank" rel="noopener noreferrer">Verify on Janoshik</a>
+            <a href={file.href} target="_blank" rel="noopener noreferrer">
+              <img src={file.image} alt={file.alt} />
+            </a>
           </article>
         ))}
       </div>

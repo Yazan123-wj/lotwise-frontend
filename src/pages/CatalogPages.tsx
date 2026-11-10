@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"
 import { CatalogBrowser, ProductCard } from "../components/catalog.tsx"
 import SpecularButton from "../components/SpecularButton.tsx"
-import { categories } from "../data/content.ts"
+import { categories } from "../lib/live.ts"
 import {
   categoryBySlug,
   formatMoney,
@@ -151,32 +151,37 @@ export function ProductPage() {
           <p className="eyebrow">{category?.name} · Research use only</p>
           <h1 className="display">{product.name}</h1>
           <p className="meta">Catalogue code {product.baseSku}</p>
-          <p className="price" style={{ fontSize: 28, marginTop: 10 }}>{formatMoney(variation.price)} <span className="meta">/ record</span></p>
+          <p className="price" style={{ fontSize: 28, marginTop: 10 }}>{formatMoney(variation.price)} <span className="meta">/ {variation.label}</span></p>
           <p className="meta">Set of 10 · {formatMoney(variation.price * 10)}. The same price, times ten. Not a discount tier.</p>
-          {minPrice(product) !== variation.price ? <p className="meta">Other options start at {formatMoney(minPrice(product))}.</p> : null}
-          <p className={status === "out-of-stock" ? "stock-out" : status === "low-stock" ? "stock-low" : "stock-in"}>{stockLabel(status)} · {variation.stockQuantity} in the sample file</p>
+          {minPrice(product) !== variation.price ? <p className="meta">Other sizes start at {formatMoney(minPrice(product))}.</p> : null}
+          <p className={status === "out-of-stock" ? "stock-out" : status === "low-stock" ? "stock-low" : "stock-in"}>{stockLabel(status)} · {variation.stockQuantity} available</p>
           <p className="prose">{product.shortDescription}</p>
-          <div className="options" role="listbox" aria-label="Sample options">
-            {product.variations.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="option"
-                aria-pressed={item.id === variation.id}
-                onClick={() => {
-                  setVariationId(item.id)
-                  setQuantity(1)
-                }}
-              >
-                <span>
-                  <strong>{item.label}</strong>
-                  <span className="meta"> {item.sku} · {stockLabel(variationStock(item.stockQuantity))}</span>
-                </span>
-                <span>{formatMoney(item.price)}</span>
-              </button>
-            ))}
+          <div className="size-picker">
+            <p className="size-picker__label">Choose size</p>
+            <div className="size-chips" role="listbox" aria-label="Choose size">
+              {product.variations.map((item) => {
+                const itemStatus = variationStock(item.stockQuantity)
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className="size-chip"
+                    role="option"
+                    aria-selected={item.id === variation.id}
+                    disabled={item.stockQuantity <= 0}
+                    onClick={() => {
+                      setVariationId(item.id)
+                      setQuantity(1)
+                    }}
+                  >
+                    <strong>{item.label}</strong>
+                    <span>{formatMoney(item.price)}</span>
+                    <em>{itemStatus === "out-of-stock" ? "Out of stock" : stockLabel(itemStatus)}</em>
+                  </button>
+                )
+              })}
+            </div>
           </div>
-          <p className="meta">Each option is a sample figure on this record. Quantity discounts are not listed.</p>
           <div className="buy-row">
             <div className="qty">
               <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>−</button>

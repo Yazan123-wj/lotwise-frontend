@@ -1,5 +1,4 @@
-import { categories, discounts } from "../data/content.ts"
-import { products } from "../data/products.ts"
+import { categories, discounts, products } from "./live.ts"
 import type { Product, StockStatus, Variation } from "../types.ts"
 
 export function formatMoney(value: number) {
