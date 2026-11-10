@@ -329,12 +329,6 @@ export function StoreLayout() {
         </svg>
       </a>
 
-      <div className="dock" aria-label="Shortcuts">
-        <button type="button" onClick={() => { setMenuOpen(false); setOpen("search") }}>Search</button>
-        <Link to="/account">Account</Link>
-        <button type="button" onClick={() => { setCartLeaving(false); setOpen("cart") }}>Cart <span className="dock-count">{cart.count}</span></button>
-      </div>
-
       {open === "search" ? <button className="search-backdrop" type="button" aria-label="Close search" onClick={() => { setQuery(""); setOpen(null) }} /> : null}
 
       {open === "cart" ? (

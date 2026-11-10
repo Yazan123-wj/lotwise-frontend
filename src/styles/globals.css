@@ -302,7 +302,7 @@ h2 + .lede {
   border: 0;
   background: transparent;
 }
-.cart-btn .count, .dock-count {
+.cart-btn .count {
   min-width: 22px;
   height: 22px;
   border-radius: 999px;
@@ -1241,37 +1241,6 @@ h2 + .lede {
 }
 .whatsapp:hover { filter: brightness(0.96); }
 
-.dock {
-  position: fixed;
-  z-index: 45;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #1b2438;
-  color: var(--white);
-  border-radius: 999px;
-  padding: 6px;
-}
-.dock button, .dock a {
-  color: inherit;
-  background: transparent;
-  border: 0;
-  border-radius: 999px;
-  min-height: 42px;
-  padding: 0 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  letter-spacing: 0.12em;
-  font-size: 12px;
-  font-weight: 700;
-}
-.dock button:hover, .dock a:hover { background: rgba(255, 255, 255, 0.1); }
-.store { padding-bottom: 92px; }
-
 .overlay, .drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -1403,8 +1372,6 @@ th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--line); 
   .vial-cluster { width: min(300px, 78vw); height: min(280px, 34vh); }
 }
 @media (min-width: 1024px) {
-  .dock { display: none; }
-  .store { padding-bottom: 0; }
   .hero {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) auto;
@@ -1522,19 +1489,6 @@ th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--line); 
   .admin-side { display: flex; gap: 8px; overflow: auto; }
   .admin { display: block; }
   .cart-label { display: none; }
-  .whatsapp { bottom: calc(76px + env(safe-area-inset-bottom)); }
-  .dock {
-    max-width: calc(100% - 16px);
-    gap: 0;
-    padding: 4px;
-    bottom: max(10px, env(safe-area-inset-bottom));
-  }
-  .dock button, .dock a {
-    padding: 0 11px;
-    letter-spacing: 0.04em;
-    font-size: 11px;
-  }
-  .store { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 }
 
 .referral .page-hero { padding-top: 0; }
