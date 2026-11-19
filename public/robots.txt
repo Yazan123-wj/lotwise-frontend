@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /order-confirmation
+Disallow: /search
+
+Sitemap: https://www.lotwiselabs.com/sitemap.xml
