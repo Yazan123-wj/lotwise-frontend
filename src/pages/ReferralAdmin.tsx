@@ -76,7 +76,7 @@ function num(value: FormDataEntryValue | null) {
 }
 
 export function ReferralsAdmin() {
-  useTitle("Referrals")
+  useTitle("Referrals", { index: false })
   const [adminEmail, setAdminEmail] = useState("")
   const [password, setPassword] = useState("")
   const [authed, setAuthed] = useState<boolean | null>(null)

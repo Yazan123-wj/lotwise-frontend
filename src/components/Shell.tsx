@@ -63,7 +63,7 @@ function IconProfile() {
 function Logo({ className = "" }: { className?: string }) {
   return (
     <Link to="/" className={`logo ${className}`} aria-label="LotWise Labs, home">
-      <img src="/brand/lotwise-logo.png" alt="" />
+      <img src="/brand/lotwise-logo.png" alt="" width={217} height={150} />
     </Link>
   )
 }
@@ -243,7 +243,7 @@ export function StoreLayout() {
             <div className="nav-search-drop">
               {results.length === 0 ? <p className="meta">No matching records.</p> : results.map((product) => (
                 <Link key={product.id} to={`/products/${product.slug}`} onClick={() => { setQuery(""); setOpen(null) }}>
-                  <img src={product.imagePaths[0]} alt="" />
+                  <img src={product.imagePaths[0]} alt={product.name} width={48} height={60} />
                   <span>
                     <strong>{product.name}</strong>
                     <span className="meta">{product.baseSku} · {formatMoney(Math.min(...product.variations.map((item) => item.price)))}</span>

@@ -28,7 +28,7 @@ function benefitLabel(benefit: { type: "percentage" | "fixed"; value: number }) 
 }
 
 export function ReferralDashboardPage() {
-  useTitle("Refer a friend")
+  useTitle("Refer a friend", { description: "Your LotWise Labs referral link.", index: false })
   const session = useSession()
   const [page, setPage] = useState(1)
   const [reload, setReload] = useState(0)
@@ -210,7 +210,7 @@ export function ReferralDashboardPage() {
 }
 
 export function ReferralLandingPage() {
-  useTitle("Referral")
+  useTitle("Referral", { description: "LotWise Labs referral visit.", index: false })
   const { code = "" } = useParams()
   const session = useSession()
   const [result, setResult] = useState<VisitResult | null>(null)
@@ -289,7 +289,9 @@ export function ReferralLandingPage() {
 }
 
 export function ReferralInfoPage() {
-  useTitle("Referral")
+  useTitle("Referral", {
+    description: "Share a LotWise Labs referral link and track visits from your account.",
+  })
   const session = useSession()
   return (
     <div className="wrap" style={{ paddingBottom: 64 }}>

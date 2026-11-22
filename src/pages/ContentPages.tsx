@@ -7,7 +7,9 @@ import { productByCode } from "../lib/catalog.ts"
 import { useTitle } from "../lib/useTitle.ts"
 
 export function AboutPage() {
-  useTitle("About")
+  useTitle("About", {
+    description: "LotWise Labs supplies research peptides with batch certificates and a public catalogue.",
+  })
   return (
     <div className="wrap" style={{ paddingBottom: 64 }}>
       <header className="page-hero">
@@ -30,7 +32,9 @@ export function AboutPage() {
 }
 
 export function ContactPage() {
-  useTitle("Contact")
+  useTitle("Contact", {
+    description: "Contact LotWise Labs about the research catalogue.",
+  })
   const [preview, setPreview] = useState("")
   return (
     <div className="wrap" style={{ paddingBottom: 64, maxWidth: 800 }}>
@@ -58,7 +62,9 @@ export function ContactPage() {
 }
 
 export function FaqPage() {
-  useTitle("FAQ")
+  useTitle("FAQ", {
+    description: "Answers about LotWise Labs catalogue prices, orders, and payment.",
+  })
   return (
     <div className="wrap" style={{ paddingBottom: 64 }}>
       <header className="page-hero">
@@ -81,7 +87,10 @@ export function FaqPage() {
 export function PolicyPage() {
   const { slug = "" } = useParams()
   const policy = policies.find((item) => item.slug === slug)
-  useTitle(policy?.title ?? "Policy")
+  useTitle(policy?.title ?? "Policy", {
+    description: policy?.summary || "LotWise Labs policy.",
+    index: Boolean(policy),
+  })
   if (!policy) {
     return (
       <div className="wrap" style={{ padding: "32px 0" }}>
@@ -110,7 +119,9 @@ export function PolicyPage() {
 }
 
 export function QualityPage() {
-  useTitle("Certificates")
+  useTitle("Certificates", {
+    description: "LotWise Labs certificates of analysis and third-party test reports.",
+  })
   const [code, setCode] = useState("")
   const [result, setResult] = useState<string | null>(null)
   function onSubmit(event: FormEvent) {
@@ -154,7 +165,10 @@ export function QualityPage() {
 }
 
 export function NotFoundPage() {
-  useTitle("Not found")
+  useTitle("Not found", {
+    description: "That LotWise Labs page was not found.",
+    index: false,
+  })
   return (
     <div className="wrap" style={{ padding: "48px 0 80px" }}>
       <h1 className="display" style={{ fontSize: "clamp(48px, 8vw, 88px)" }}>That page is not on this site.</h1>

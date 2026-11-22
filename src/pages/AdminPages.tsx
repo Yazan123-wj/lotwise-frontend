@@ -20,7 +20,7 @@ function SavedNote({ text }: { text: string }) {
 }
 
 export function AdminLayout() {
-  useTitle("Admin")
+  useTitle("Admin", { index: false })
   return (
     <AdminFrame>
       <Outlet />
@@ -29,7 +29,7 @@ export function AdminLayout() {
 }
 
 export function AdminLogin() {
-  useTitle("Admin sign-in")
+  useTitle("Admin sign-in", { index: false })
   const [note, setNote] = useState("")
   return (
     <div className="gate">
@@ -127,7 +127,7 @@ export function ProductForm() {
   const { productId } = useParams()
   const product = products.find((item) => item.id === productId)
   const [note, setNote] = useState("")
-  useTitle(product ? product.name : "Product form")
+  useTitle(product ? product.name : "Product form", { index: false })
   return (
     <form className="panel" onSubmit={(event: FormEvent) => { event.preventDefault(); setNote("The edit form was submitted in this browser only.") }}>
       <h1 className="display">{product ? product.name : "Add product"}</h1>

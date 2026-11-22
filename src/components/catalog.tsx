@@ -93,7 +93,7 @@ export function ProductCard({ product }: { product: Product }) {
     <article className="product-card">
       <Link to={`/products/${product.slug}`}>
         <div className="media">
-          <img src={mediaSrc(product.imagePaths[0] ?? "/images/lotwise-vial.png")} alt="" loading="lazy" decoding="async" />
+          <img src={mediaSrc(product.imagePaths[0] ?? "/images/lotwise-vial.png")} alt={product.name} width={640} height={800} loading="lazy" decoding="async" />
           <span className="chip">{categoryName(product.categorySlug)}</span>
         </div>
         <h3>{product.name}</h3>

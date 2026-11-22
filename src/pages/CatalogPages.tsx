@@ -16,11 +16,13 @@ import {
   visibleProducts,
 } from "../lib/catalog.ts"
 import { mediaSrc } from "../lib/media.ts"
-import { useTitle } from "../lib/useTitle.ts"
+import { canonicalUrl, SITE_ORIGIN, useTitle } from "../lib/useTitle.ts"
 import { useCart } from "../state/cart.tsx"
 
 export function ShopPage() {
-  useTitle("Catalog")
+  useTitle("Catalog", {
+    description: "Browse the LotWise Labs research catalogue by category, size, and availability.",
+  })
   return (
     <CatalogBrowser
       products={visibleProducts()}
@@ -33,7 +35,20 @@ export function ShopPage() {
 export function CategoryPage() {
   const { slug = "" } = useParams()
   const category = categoryBySlug(slug)
-  useTitle(category?.name ?? "Category")
+  useTitle(category?.name ?? "Category", {
+    description: category?.description || "LotWise Labs product category.",
+    index: Boolean(category),
+    jsonLd: category
+      ? {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Catalog", item: `${SITE_ORIGIN}/shop` },
+            { "@type": "ListItem", position: 2, name: category.name, item: canonicalUrl(`/categories/${category.slug}`) },
+          ],
+        }
+      : undefined,
+  })
   if (!category) {
     return (
       <div className="wrap" style={{ padding: "32px 0 64px" }}>
@@ -58,7 +73,10 @@ export function CategoryPage() {
 export function SearchPage() {
   const [params] = useSearchParams()
   const query = params.get("q") ?? ""
-  useTitle(query ? `Search “${query}”` : "Search")
+  useTitle(query ? `Search “${query}”` : "Search", {
+    description: "Search the LotWise Labs catalogue.",
+    index: false,
+  })
   const results = query.trim() ? searchProducts(query) : []
   return (
     <div className="wrap" style={{ paddingBottom: 64 }}>
@@ -99,7 +117,46 @@ export function ProductPage() {
   const [image, setImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [note, setNote] = useState<string | null>(null)
-  useTitle(product?.name ?? "Record")
+  const category = categories.find((item) => item.slug === product?.categorySlug)
+  const prices = product?.variations.map((item) => item.price) ?? []
+  const lowPrice = prices.length ? Math.min(...prices) : 0
+  const highPrice = prices.length ? Math.max(...prices) : 0
+  const inStock = product ? product.variations.some((item) => item.stockQuantity > 0) : false
+  useTitle(product?.name ?? "Product", {
+    description: product?.shortDescription || "LotWise Labs research product.",
+    index: Boolean(product),
+    jsonLd: product
+      ? [
+          {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Catalog", item: `${SITE_ORIGIN}/shop` },
+              ...(category ? [{ "@type": "ListItem", position: 2, name: category.name, item: canonicalUrl(`/categories/${category.slug}`) }] : []),
+              { "@type": "ListItem", position: category ? 3 : 2, name: product.name, item: canonicalUrl(`/products/${product.slug}`) },
+            ],
+          },
+          {
+            "@type": "Product",
+            name: product.name,
+            description: product.shortDescription,
+            sku: product.baseSku,
+            image: (product.imagePaths.length ? product.imagePaths : ["/images/lotwise-vial.png"]).map((path) =>
+              path.startsWith("http") ? path : `${SITE_ORIGIN}${mediaSrc(path)}`,
+            ),
+            brand: { "@type": "Brand", name: "LotWise Labs" },
+            offers: {
+              "@type": "AggregateOffer",
+              url: canonicalUrl(`/products/${product.slug}`),
+              priceCurrency: "USD",
+              lowPrice,
+              highPrice,
+              offerCount: product.variations.length,
+              availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            },
+          },
+        ]
+      : undefined,
+  })
 
   useEffect(() => {
     setVariationId(product?.variations[0]?.id ?? "")
@@ -122,7 +179,6 @@ export function ProductPage() {
   const variation = product.variations.find((item) => item.id === variationId) ?? product.variations[0]
   const status = variationStock(variation.stockQuantity)
   const related = relatedProducts(product)
-  const category = categories.find((item) => item.slug === product.categorySlug)
 
   return (
     <div className="wrap">
@@ -136,13 +192,13 @@ export function ProductPage() {
       <div className="product-layout">
         <div className="gallery">
           <div className="gallery-main">
-            <img src={mediaSrc(product.imagePaths[image] ?? product.imagePaths[0] ?? "/images/lotwise-vial.png")} alt="" decoding="async" fetchPriority="high" />
+            <img src={mediaSrc(product.imagePaths[image] ?? product.imagePaths[0] ?? "/images/lotwise-vial.png")} alt={product.name} width={682} height={1024} decoding="async" fetchPriority="high" />
           </div>
           {product.imagePaths.length > 1 ? (
             <div className="thumbs">
               {product.imagePaths.map((src, index) => (
                 <button key={src} type="button" aria-label={`Image ${index + 1}`} aria-pressed={index === image} onClick={() => setImage(index)}>
-                  <img src={mediaSrc(src)} alt="" loading="lazy" decoding="async" />
+                  <img src={mediaSrc(src)} alt="" width={120} height={120} loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>

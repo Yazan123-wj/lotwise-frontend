@@ -36,7 +36,7 @@ const emptyAddress: Address = {
 }
 
 export function CartPage() {
-  useTitle("Cart")
+  useTitle("Cart", { description: "Your LotWise Labs cart.", index: false })
   const cart = useCart()
   const session = useSession()
   const [code, setCode] = useState(cart.discountInput)
@@ -117,7 +117,7 @@ export function CartPage() {
 }
 
 export function CheckoutPage() {
-  useTitle("Checkout")
+  useTitle("Checkout", { description: "Place a LotWise Labs order.", index: false })
   const cart = useCart()
   const session = useSession()
   const navigate = useNavigate()
@@ -278,7 +278,7 @@ export function CheckoutPage() {
 }
 
 export function ConfirmationPage() {
-  useTitle("Order confirmation")
+  useTitle("Order confirmation", { description: "LotWise Labs order confirmation.", index: false })
   const { receipt } = useCart()
   if (!receipt) {
     return (

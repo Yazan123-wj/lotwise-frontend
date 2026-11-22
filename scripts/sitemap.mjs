@@ -68,12 +68,15 @@ writeFileSync(
   join(root, "public/robots.txt"),
   `User-agent: *
 Allow: /
+Allow: /assets/
+Allow: /images/
 Disallow: /admin
 Disallow: /account
 Disallow: /cart
 Disallow: /checkout
 Disallow: /order-confirmation
 Disallow: /search
+Disallow: /ref/
 
 Sitemap: ${origin}/sitemap.xml
 `,

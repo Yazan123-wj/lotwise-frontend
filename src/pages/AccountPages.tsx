@@ -84,7 +84,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 }
 
 export function AccountLayout() {
-  useTitle("Account")
+  useTitle("Account", { description: "Your LotWise Labs account.", index: false })
   const session = useSession()
   const { pathname } = useLocation()
   const navRef = useRef<HTMLElement>(null)
@@ -495,7 +495,7 @@ export function OrderDetailPage() {
     }
   }, [orderId, session.customer?.id])
 
-  useTitle(order?.orderNumber ?? "Order")
+  useTitle(order?.orderNumber ?? "Order", { description: "LotWise Labs order.", index: false })
 
   return (
     <RequireAuth>

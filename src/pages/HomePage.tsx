@@ -11,6 +11,7 @@ import {
   visibleProducts,
 } from "../lib/catalog.ts"
 import { mediaSrc } from "../lib/media.ts"
+import { SITE_ORIGIN, useTitle } from "../lib/useTitle.ts"
 
 const steps = [
   { n: "01", title: "Explore", body: "Open the catalog and filter by area.", to: "/shop", label: "Open the catalog" },
@@ -33,6 +34,22 @@ export function HomePage() {
   const recordCount = visibleProducts().length
   const areaCount = categories.filter((category) => countInCategory(category.slug) > 0).length
   const sample = visibleProducts()[0]
+  useTitle("LotWise Labs", {
+    description: hero.lede || "LotWise Labs research peptide catalogue.",
+    jsonLd: [
+      {
+        "@type": "Organization",
+        name: "LotWise Labs",
+        url: `${SITE_ORIGIN}/`,
+        logo: `${SITE_ORIGIN}/brand/lotwise-logo.png`,
+      },
+      {
+        "@type": "WebSite",
+        name: "LotWise Labs",
+        url: `${SITE_ORIGIN}/`,
+      },
+    ],
+  })
 
   function showCertificate(index: number) {
     const track = certTrack.current
@@ -51,7 +68,7 @@ export function HomePage() {
   return (
     <>
       <section className="hero">
-        <AnimatedContent className="hero-copy" stagger={0.08} distance={100} duration={0.8} ease="power3.out">
+        <AnimatedContent className="hero-copy" stagger={0.08} distance={100} duration={0.8} ease="power3.out" trigger="mount">
           <p className="hero-kicker">{hero.kicker}</p>
           <h1 className="display">{hero.title}</h1>
           <p className="hero-lede">{hero.lede}</p>
@@ -60,11 +77,11 @@ export function HomePage() {
             <SpecularButton tone="outline" to="/quality">Certificates</SpecularButton>
           </div>
         </AnimatedContent>
-        <AnimatedContent className="hero-visual" distance={80} delay={0.12} duration={0.8} ease="power3.out">
+        <AnimatedContent className="hero-visual" distance={80} delay={0.12} duration={0.8} ease="power3.out" trigger="mount">
           <div className="vial-cluster">
-            <img className="vial-back vial-back-left" src={mediaSrc("/images/hero-vial.png")} alt="" decoding="async" />
-            <img className="vial-back vial-back-right" src={mediaSrc("/images/hero-vial.png")} alt="" decoding="async" />
-            <img className="vial-front" src={mediaSrc("/images/hero-vial.png")} alt="LotWise Labs research vial" fetchPriority="high" decoding="async" />
+            <img className="vial-back vial-back-left" src={mediaSrc("/images/hero-vial.png")} alt="" width={682} height={1024} decoding="async" />
+            <img className="vial-back vial-back-right" src={mediaSrc("/images/hero-vial.png")} alt="" width={682} height={1024} decoding="async" />
+            <img className="vial-front" src={mediaSrc("/images/hero-vial.png")} alt="LotWise Labs research vial" width={682} height={1024} fetchPriority="high" decoding="async" />
           </div>
         </AnimatedContent>
       </section>
@@ -124,7 +141,7 @@ export function HomePage() {
             <SpecularButton tone="ghost" to="/about" style={{ marginTop: 18 }}>About LotWise</SpecularButton>
           </div>
           <figure className="figure">
-            <img src={mediaSrc("/images/hero-vial.png")} alt="" loading="lazy" decoding="async" />
+            <img src={mediaSrc("/images/hero-vial.png")} alt="" width={682} height={1024} loading="lazy" decoding="async" />
             <figcaption>{sample?.name ?? "LotWise Labs"} · Research use only</figcaption>
           </figure>
         </div>
@@ -232,7 +249,7 @@ export function HomePage() {
               </p>
             ) : null}
           </div>
-          <img src={mediaSrc("/images/lotwise-vial.png")} alt="" style={{ borderRadius: 28 }} loading="lazy" decoding="async" />
+          <img src={mediaSrc("/images/lotwise-vial.png")} alt="LotWise Labs vial" width={682} height={1024} style={{ borderRadius: 28 }} loading="lazy" decoding="async" />
         </div>
       </section>
       </AnimatedContent>
