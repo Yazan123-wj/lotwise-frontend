@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
+import { STORE_API } from "../seo/routes.mjs"
 
 const origin = "https://www.lotwiselabs.com"
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
@@ -25,7 +26,7 @@ function esc(value) {
 
 async function loadStore() {
   try {
-    const response = await fetch(`${origin}/api/store`)
+    const response = await fetch(STORE_API)
     if (!response.ok) throw new Error(String(response.status))
     return await response.json()
   } catch (error) {

@@ -17,7 +17,9 @@ async function catalogue() {
 
 export default async function middleware(request) {
   const url = new URL(request.url)
-  const kind = classify(url.pathname, await catalogue())
+  const path = url.pathname
+  if (path.startsWith("/api/") || path.startsWith("/images/") || path.startsWith("/brand/") || path.startsWith("/assets/")) return
+  const kind = classify(path, await catalogue())
   if (kind !== "missing") return
   const shell = await fetch(new URL("/404.html", url.origin))
   const html = shell.ok ? await shell.text() : "<!doctype html><title>Not found · LotWise Labs</title><p>That page is not on this site.</p>"
@@ -32,5 +34,5 @@ export default async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!assets/|images/|brand/|favicon.ico|sitemap.xml|robots.txt|404.html|.*\\..*).*)"],
+  matcher: ["/((?!api/|assets/|images/|brand/|favicon.ico|sitemap.xml|robots.txt|404.html|.*\\..*).*)"],
 }
