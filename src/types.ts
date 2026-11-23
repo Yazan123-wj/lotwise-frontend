@@ -6,6 +6,16 @@ export type Variation = {
   stockQuantity: number
 }
 
+export type BundleTier = {
+  minQuantity: number
+  percentOff: number
+}
+
+export type ProductSection = {
+  title: string
+  subtitle: string
+}
+
 export type Product = {
   id: string
   slug: string
@@ -18,6 +28,8 @@ export type Product = {
   visible: boolean
   imagePaths: string[]
   variations: Variation[]
+  bundles?: BundleTier[]
+  sections?: ProductSection[]
 }
 
 export type Category = {
@@ -26,6 +38,7 @@ export type Category = {
   name: string
   description: string
   imagePath: string
+  videoPath?: string
   displayOrder: number
   active: boolean
   featured: boolean

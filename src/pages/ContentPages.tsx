@@ -1,15 +1,26 @@
 import { useState, type FormEvent } from "react"
 import { Link, useParams } from "react-router-dom"
 import { faqs, policies } from "../data/content.ts"
-import { certificates } from "../lib/live.ts"
+import { aboutVideo, certificates, terms } from "../lib/live.ts"
 import SpecularButton from "../components/SpecularButton.tsx"
 import { productByCode } from "../lib/catalog.ts"
 import { useTitle } from "../lib/useTitle.ts"
+
+function aboutEmbed(value: string) {
+  const src = value.trim()
+  if (!src) return null
+  const youtube = src.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/)
+  if (youtube) return { kind: "frame" as const, src: `https://www.youtube.com/embed/${youtube[1]}` }
+  const vimeo = src.match(/vimeo\.com\/(?:video\/)?(\d+)/)
+  if (vimeo) return { kind: "frame" as const, src: `https://player.vimeo.com/video/${vimeo[1]}` }
+  return { kind: "file" as const, src }
+}
 
 export function AboutPage() {
   useTitle("About", {
     description: "LotWise Labs supplies research peptides with batch certificates and a public catalogue.",
   })
+  const video = aboutEmbed(aboutVideo)
   return (
     <div className="wrap" style={{ paddingBottom: 64 }}>
       <header className="page-hero">
@@ -17,6 +28,15 @@ export function AboutPage() {
         <h1 className="display">LotWise Labs</h1>
         <p className="lede">LotWise Labs is positioned around precision, science, quality, trust, transparency, and research-focused peptide solutions. Company history and approved about copy have not been supplied, so this page keeps to that positioning.</p>
       </header>
+      {video ? (
+        <div className="about-video">
+          {video.kind === "file" ? (
+            <video src={video.src} controls playsInline preload="metadata" />
+          ) : (
+            <iframe src={video.src} title="About LotWise Labs" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+          )}
+        </div>
+      ) : null}
       <div className="info-grid">
         {["Precision", "Quality", "Transparency"].map((item, index) => (
           <article className="info-card" key={item}>
@@ -86,7 +106,9 @@ export function FaqPage() {
 
 export function PolicyPage() {
   const { slug = "" } = useParams()
-  const policy = policies.find((item) => item.slug === slug)
+  const policy = slug === "terms"
+    ? { slug: "terms", title: terms.title, summary: terms.summary, sections: terms.sections }
+    : policies.find((item) => item.slug === slug)
   useTitle(policy?.title ?? "Policy", {
     description: policy?.summary || "LotWise Labs policy.",
     index: Boolean(policy),

@@ -285,6 +285,7 @@ export function SignInPage() {
       <SpecularButton tone="primary" type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</SpecularButton>
       {message ? <p className="notice">{message}</p> : null}
       <p className="meta">Need an account? <Link to="/account/register">Create one</Link></p>
+      <p className="meta"><Link to="/checkout">Continue as guest</Link></p>
     </form>
   )
 }
@@ -420,7 +421,7 @@ export function AddressesPage() {
           <h3>Add address</h3>
           <label className="field"><span>Address</span><input value={draft.line1} onChange={(event) => setDraft({ ...draft, line1: event.target.value })} required /></label>
           <label className="field"><span>City</span><input value={draft.city} onChange={(event) => setDraft({ ...draft, city: event.target.value })} required /></label>
-          <label className="field"><span>Region</span><input value={draft.region} onChange={(event) => setDraft({ ...draft, region: event.target.value })} /></label>
+          <label className="field"><span>State</span><input value={draft.region} onChange={(event) => setDraft({ ...draft, region: event.target.value })} /></label>
           <label className="field"><span>Postal code</span><input value={draft.postalCode} onChange={(event) => setDraft({ ...draft, postalCode: event.target.value })} /></label>
           <label className="field"><span>Country</span><input value={draft.country} onChange={(event) => setDraft({ ...draft, country: event.target.value })} /></label>
           <SpecularButton tone="primary" type="submit">Add address</SpecularButton>

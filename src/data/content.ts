@@ -162,7 +162,7 @@ export const faqs = [
     id: "faq_payment",
     question: "Does checkout take payment yet?",
     answer:
-      "Not yet. You can place an order and it is saved on your account as awaiting payment. Card payment will be collected once our payment provider is connected.",
+      "Not yet. You can place an order as a guest or from your account, and it is saved as awaiting payment. Card payment will be collected once our payment provider is connected.",
   },
   {
     id: "faq_products",
@@ -191,7 +191,7 @@ export const policies = [
       },
       {
         heading: "Orders",
-        body: "Placing an order creates a pending-payment order on your account. Payment is collected when the payment provider is connected. LotWise Labs may confirm shipping separately.",
+        body: "Placing an order creates a pending-payment order. You can check out as a guest, or sign in to keep it on your account. Payment is collected when the payment provider is connected. LotWise Labs may confirm shipping separately.",
       },
       {
         heading: "Research use",

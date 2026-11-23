@@ -84,6 +84,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(CART_KEY, JSON.stringify({ lines, discountInput }))
   }, [lines, discountInput, ready])
 
+  useEffect(() => {
+    if (!ready) return
+    function reprice() {
+      setLines((current) => current.map(refreshLine).filter((line): line is CartLine => line !== null))
+    }
+    reprice()
+    window.addEventListener("lotwise-store", reprice)
+    return () => window.removeEventListener("lotwise-store", reprice)
+  }, [ready])
+
   const subtotal = lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0)
   const quote = quoteDiscount(subtotal, discountInput)
   const serverMatches = Boolean(serverDiscount && serverDiscount.code.toLowerCase() === discountInput.trim().toLowerCase())
@@ -126,7 +136,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
             if (line.key !== key) return [line]
             const next = Math.min(line.stockQuantity, Math.max(0, quantity))
             if (next <= 0) return []
-            return [{ ...line, quantity: next }]
+            const product = products.find((item) => item.id === line.productId)
+            const variation = product?.variations.find((item) => item.id === line.variationId)
+            if (!product || !variation) return [{ ...line, quantity: next }]
+            return [lineFor(product, variation, next)]
           }),
         )
       },

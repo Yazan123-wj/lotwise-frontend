@@ -129,10 +129,6 @@ export function CheckoutPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!session.customer) {
-      setFormError("Sign in to place your order.")
-      return
-    }
     const data = new FormData(event.currentTarget)
     const name = String(data.get("name") ?? "").trim()
     const email = String(data.get("email") ?? "").trim()
@@ -143,7 +139,7 @@ export function CheckoutPage() {
     if (!phone) nextErrors.phone = "Enter a phone number."
     if (!address.line1.trim()) nextErrors.line1 = "Enter an address line."
     if (!address.city.trim()) nextErrors.city = "Enter a city."
-    if (!address.region.trim()) nextErrors.region = "Enter a region."
+    if (!address.region.trim()) nextErrors.region = "Enter a state."
     if (!address.postalCode.trim()) nextErrors.postalCode = "Enter a postal code."
     if (!address.country.trim()) nextErrors.country = "Enter a country."
     setErrors(nextErrors)
@@ -214,19 +210,10 @@ export function CheckoutPage() {
         <p className="eyebrow">Checkout</p>
         <h1 className="display">Place your order</h1>
         <p className="lede">
-          Orders are stored on your account as awaiting payment. Card payment will be added once the payment provider is connected.
+          Continue as a guest, or sign in to keep the order on your account. Card payment will be added once the payment provider is connected.
         </p>
       </header>
-      {!session.customer ? (
-        <div className="account-empty">
-          <h2>Sign in to checkout</h2>
-          <p className="lede">Create an account or sign in so we can save your order and show it under Account → Orders.</p>
-          <div className="account-empty__actions">
-            <SpecularButton tone="primary" to="/account/sign-in">Sign in</SpecularButton>
-            <SpecularButton tone="ghost" to="/account/register">Create account</SpecularButton>
-          </div>
-        </div>
-      ) : cart.lines.length === 0 ? (
+      {cart.lines.length === 0 ? (
         <div className="empty">
           <p>Add a product before checking out.</p>
           <SpecularButton tone="primary" to="/shop">Browse catalogue</SpecularButton>
@@ -234,15 +221,18 @@ export function CheckoutPage() {
       ) : (
         <form className="two" onSubmit={onSubmit}>
           <div className="panel">
+            {!session.customer ? (
+              <p className="notice">Checking out as a guest. <Link to="/account/sign-in">Sign in</Link> or <Link to="/account/register">create an account</Link> if you want this order saved under Account.</p>
+            ) : null}
             <h2>Contact</h2>
-            <label className="field"><span>Name</span><input name="name" defaultValue={session.customer.name} required /><em className="error">{errors.name}</em></label>
-            <label className="field"><span>Email</span><input name="email" type="email" defaultValue={session.customer.email} required /><em className="error">{errors.email}</em></label>
+            <label className="field"><span>Name</span><input name="name" defaultValue={session.customer?.name ?? ""} required /><em className="error">{errors.name}</em></label>
+            <label className="field"><span>Email</span><input name="email" type="email" defaultValue={session.customer?.email ?? ""} required /><em className="error">{errors.email}</em></label>
             <label className="field"><span>Phone</span><input name="phone" required /><em className="error">{errors.phone}</em></label>
             <h2 style={{ marginTop: 12 }}>Shipping address</h2>
             <label className="field"><span>Address</span><input value={address.line1} onChange={(event) => setAddress({ ...address, line1: event.target.value })} /><em className="error">{errors.line1}</em></label>
             <label className="field"><span>Address line 2</span><input value={address.line2} onChange={(event) => setAddress({ ...address, line2: event.target.value })} /></label>
             <label className="field"><span>City</span><input value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} /><em className="error">{errors.city}</em></label>
-            <label className="field"><span>Region</span><input value={address.region} onChange={(event) => setAddress({ ...address, region: event.target.value })} /><em className="error">{errors.region}</em></label>
+            <label className="field"><span>State</span><input value={address.region} onChange={(event) => setAddress({ ...address, region: event.target.value })} /><em className="error">{errors.region}</em></label>
             <label className="field"><span>Postal code</span><input value={address.postalCode} onChange={(event) => setAddress({ ...address, postalCode: event.target.value })} /><em className="error">{errors.postalCode}</em></label>
             <label className="field"><span>Country</span><input value={address.country} onChange={(event) => setAddress({ ...address, country: event.target.value })} /><em className="error">{errors.country}</em></label>
             <label className="field">
@@ -280,6 +270,7 @@ export function CheckoutPage() {
 export function ConfirmationPage() {
   useTitle("Order confirmation", { description: "LotWise Labs order confirmation.", index: false })
   const { receipt } = useCart()
+  const session = useSession()
   if (!receipt) {
     return (
       <div className="wrap" style={{ padding: "32px 0 64px" }}>
@@ -316,8 +307,8 @@ export function ConfirmationPage() {
         <p style={{ marginTop: 12 }}><strong>Total {formatMoney(receipt.total)}</strong></p>
         {receipt.discountCode ? <p className="meta">Code {receipt.discountCode} · {formatMoney(receipt.discountAmount)}</p> : null}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
-          <SpecularButton tone="primary" to="/account/orders">View orders</SpecularButton>
-          <SpecularButton tone="ghost" to="/shop">Continue browsing</SpecularButton>
+          {session.customer ? <SpecularButton tone="primary" to="/account/orders">View orders</SpecularButton> : null}
+          <SpecularButton tone={session.customer ? "ghost" : "primary"} to="/shop">Continue browsing</SpecularButton>
         </div>
       </div>
     </div>

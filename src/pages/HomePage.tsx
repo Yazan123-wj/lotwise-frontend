@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { ProductCard } from "../components/catalog.tsx"
 import AnimatedContent from "../components/AnimatedContent.tsx"
 import SpecularButton from "../components/SpecularButton.tsx"
+import { faqs } from "../data/content.ts"
 import { categories, certificates, hero } from "../lib/live.ts"
 import {
   categoryName,
@@ -17,8 +18,28 @@ const steps = [
   { n: "01", title: "Explore", body: "Open the catalog and filter by area.", to: "/shop", label: "Open the catalog" },
   { n: "02", title: "Review", body: "Open a product and choose a size.", to: "/shop", label: "Browse products" },
   { n: "03", title: "Add", body: "Add items to your cart.", to: "/cart", label: "View the cart" },
-  { n: "04", title: "Order", body: "Sign in and place your order. Payment comes next.", to: "/checkout", label: "Go to checkout" },
+  { n: "04", title: "Order", body: "Continue as a guest or sign in. Payment comes next.", to: "/checkout", label: "Go to checkout" },
 ]
+
+const STOCK_HERO = "/images/hero-vial.png"
+
+function HeroVisual({ src }: { src: string }) {
+  const image = mediaSrc(src)
+  if (src === STOCK_HERO || src === "/images/lotwise-vial.png") {
+    return (
+      <div className="vial-cluster">
+        <img className="vial-back vial-back-left" src={image} alt="" width={682} height={1024} decoding="async" />
+        <img className="vial-back vial-back-right" src={image} alt="" width={682} height={1024} decoding="async" />
+        <img className="vial-front" src={image} alt="LotWise Labs research vial" width={682} height={1024} fetchPriority="high" decoding="async" />
+      </div>
+    )
+  }
+  return (
+    <div className="vial-cluster">
+      <img className="hero-photo" src={image} alt="" fetchPriority="high" decoding="async" />
+    </div>
+  )
+}
 
 export function HomePage() {
   const featuredAreas = categories.filter((category) => category.featured)
@@ -47,6 +68,14 @@ export function HomePage() {
         "@type": "WebSite",
         name: "LotWise Labs",
         url: `${SITE_ORIGIN}/`,
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
       },
     ],
   })
@@ -78,12 +107,24 @@ export function HomePage() {
           </div>
         </AnimatedContent>
         <AnimatedContent className="hero-visual" distance={80} delay={0.12} duration={0.8} ease="power3.out" trigger="mount">
-          <div className="vial-cluster">
-            <img className="vial-back vial-back-left" src={mediaSrc("/images/hero-vial.png")} alt="" width={682} height={1024} decoding="async" />
-            <img className="vial-back vial-back-right" src={mediaSrc("/images/hero-vial.png")} alt="" width={682} height={1024} decoding="async" />
-            <img className="vial-front" src={mediaSrc("/images/hero-vial.png")} alt="LotWise Labs research vial" width={682} height={1024} fetchPriority="high" decoding="async" />
-          </div>
+          <HeroVisual src={hero.image || "/images/hero-vial.png"} />
         </AnimatedContent>
+      </section>
+
+      <section className="home-stats" aria-label="LotWise Labs figures">
+        <div className="wrap">
+          {[
+            { value: "99%+", label: "Over 99% purity" },
+            { value: "COA", label: "Certified every batch tested" },
+            { value: "$350", label: "Free shipping above this order" },
+            { value: String(recordCount), label: "Products in the catalogue" },
+          ].map((item) => (
+            <article key={item.label}>
+              <strong>{item.value}</strong>
+              <span>{item.label}</span>
+            </article>
+          ))}
+        </div>
       </section>
 
       <AnimatedContent distance={100} duration={0.8} ease="power3.out">
@@ -132,16 +173,16 @@ export function HomePage() {
           <div>
             <p className="eyebrow">Catalogue</p>
             <h2 className="display">Built around the records.</h2>
-            <p className="lede" style={{ marginTop: 16 }}>LotWise Labs lists research peptides with clear options, certificates, and checkout on your account.</p>
+            <p className="lede" style={{ marginTop: 16 }}>LotWise Labs lists research peptides with clear options, certificates, and checkout as a guest or from your account.</p>
             <div className="point-list">
               <article><strong>01</strong><div><h3>Catalogue</h3><p className="meta">Each product has a name, code, and available sizes.</p></div></article>
               <article><strong>02</strong><div><h3>Certificates</h3><p className="meta">Janoshik reports sit on the certificates page, with a verify link.</p></div></article>
-              <article><strong>03</strong><div><h3>Orders</h3><p className="meta">Add to cart, sign in, and place an order awaiting payment.</p></div></article>
+              <article><strong>03</strong><div><h3>Orders</h3><p className="meta">Add to cart and place an order as a guest or from your account. Payment is collected later.</p></div></article>
             </div>
             <SpecularButton tone="ghost" to="/about" style={{ marginTop: 18 }}>About LotWise</SpecularButton>
           </div>
           <figure className="figure">
-            <img src={mediaSrc("/images/hero-vial.png")} alt="" width={682} height={1024} loading="lazy" decoding="async" />
+            <img src={mediaSrc("/images/hero-vial.png")} alt="" loading="lazy" decoding="async" />
             <figcaption>{sample?.name ?? "LotWise Labs"} · Research use only</figcaption>
           </figure>
         </div>
@@ -279,6 +320,29 @@ export function HomePage() {
               </article>
             ))}
           </AnimatedContent>
+        </div>
+      </section>
+      </AnimatedContent>
+
+      <AnimatedContent distance={100} duration={0.8} ease="power3.out">
+      <section className="section" aria-labelledby="home-faq">
+        <div className="wrap home-faq">
+          <div className="section-head">
+            <div>
+              <p className="eyebrow">FAQ</p>
+              <h2 id="home-faq" className="display">Questions</h2>
+              <p className="lede">Prices, orders, and how to reach LotWise Labs.</p>
+            </div>
+            <SpecularButton tone="ghost" to="/faq">All questions</SpecularButton>
+          </div>
+          <div className="faq">
+            {faqs.map((item) => (
+              <details key={item.id}>
+                <summary>{item.question}</summary>
+                <p className="lede">{item.answer}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
       </AnimatedContent>

@@ -1,5 +1,5 @@
 import { categories, discounts, products } from "./live.ts"
-import type { Product, StockStatus, Variation } from "../types.ts"
+import type { BundleTier, Product, StockStatus, Variation } from "../types.ts"
 
 export function formatMoney(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -87,6 +87,7 @@ export function searchProducts(query: string) {
       product.baseSku,
       product.shortDescription,
       product.description,
+      ...(product.sections ?? []).flatMap((section) => [section.title, section.subtitle]),
       categoryName(product.categorySlug),
       ...product.variations.flatMap((variation) => [variation.sku, variation.label]),
     ]
@@ -174,7 +175,47 @@ export function quoteDiscount(subtotal: number, rawCode: string) {
   }
 }
 
+const COUNT_WORDS = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
+
+export function bundleTiers(product: Product): BundleTier[] {
+  const seen = new Set<number>()
+  return (product.bundles ?? [])
+    .map((tier) => ({
+      minQuantity: Math.round(Number(tier.minQuantity)),
+      percentOff: Number(tier.percentOff),
+    }))
+    .filter((tier) => tier.minQuantity >= 2 && tier.percentOff > 0 && tier.percentOff < 100 && !seen.has(tier.minQuantity) && seen.add(tier.minQuantity))
+    .sort((a, b) => a.minQuantity - b.minQuantity)
+}
+
+export function discountedUnit(price: number, percentOff: number) {
+  if (!(percentOff > 0) || percentOff >= 100) return Math.round(price * 100) / 100
+  return Math.round(price * (100 - percentOff)) / 100
+}
+
+export function activeBundle(product: Product, quantity: number) {
+  let match: BundleTier | null = null
+  for (const tier of bundleTiers(product)) {
+    if (quantity >= tier.minQuantity) match = tier
+  }
+  return match
+}
+
+export function bundleOffers(product: Product, price: number) {
+  const tiers = bundleTiers(product)
+  return [
+    { minQuantity: 1, percentOff: 0, label: "Buy One", unitPrice: discountedUnit(price, 0) },
+    ...tiers.map((tier, index) => ({
+      minQuantity: tier.minQuantity,
+      percentOff: tier.percentOff,
+      label: `Buy ${COUNT_WORDS[tier.minQuantity] ?? tier.minQuantity}${index === tiers.length - 1 ? "+" : ""}`,
+      unitPrice: discountedUnit(price, tier.percentOff),
+    })),
+  ]
+}
+
 export function lineFor(product: Product, variation: Variation, quantity: number) {
+  const percent = activeBundle(product, quantity)?.percentOff ?? 0
   return {
     key: `${product.id}:${variation.id}`,
     productId: product.id,
@@ -184,7 +225,7 @@ export function lineFor(product: Product, variation: Variation, quantity: number
     sku: variation.sku,
     variationLabel: variation.label,
     image: product.imagePaths[0] ?? "",
-    unitPrice: variation.price,
+    unitPrice: discountedUnit(variation.price, percent),
     quantity,
     stockQuantity: variation.stockQuantity,
   }

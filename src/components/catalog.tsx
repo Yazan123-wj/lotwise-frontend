@@ -5,8 +5,6 @@ import {
   categoryName,
   countInCategory,
   formatMoney,
-  minPrice,
-  priceLabel,
   productStock,
   sortProducts,
   stockLabel,
@@ -99,13 +97,14 @@ export function ProductCard({ product }: { product: Product }) {
         <h3>{product.name}</h3>
       </Link>
       <p className="meta">{product.baseSku} · Research use only</p>
-      <p className="price">{priceLabel(product)} <span className="meta">/ size</span></p>
-      <p className="meta">
-        {product.variations.length > 1
-          ? `Sizes ${product.variations.map((item) => item.label).join(" · ")}`
-          : product.variations[0]?.label || "One size"}
-        {" · "}Set of 10 · {formatMoney(minPrice(product) * 10)}
-      </p>
+      <ul className="size-prices">
+        {product.variations.map((item) => (
+          <li key={item.id}>
+            <span>{item.label}</span>
+            <strong>{formatMoney(item.price)}</strong>
+          </li>
+        ))}
+      </ul>
       <p className={status === "out-of-stock" ? "stock-out" : status === "low-stock" ? "stock-low" : "stock-in"}>{stockLabel(status)}</p>
       <div className="box-foot">
         <button className="text-btn" type="button" disabled={!available} onClick={add}>
@@ -119,6 +118,30 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       {message ? <p className="meta">{message}</p> : null}
     </article>
+  )
+}
+
+function categoryVideo(value: string) {
+  const src = value.trim()
+  if (!src) return null
+  const youtube = src.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/)
+  if (youtube) return { kind: "frame" as const, src: `https://www.youtube.com/embed/${youtube[1]}` }
+  const vimeo = src.match(/vimeo\.com\/(?:video\/)?(\d+)/)
+  if (vimeo) return { kind: "frame" as const, src: `https://player.vimeo.com/video/${vimeo[1]}` }
+  return { kind: "file" as const, src }
+}
+
+function CategoryVideo({ src }: { src: string }) {
+  const video = categoryVideo(src)
+  if (!video) return null
+  return (
+    <div className="category-video">
+      {video.kind === "file" ? (
+        <video src={video.src} controls playsInline preload="metadata" />
+      ) : (
+        <iframe src={video.src} title="Category video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+      )}
+    </div>
   )
 }
 
@@ -199,6 +222,7 @@ export function CatalogBrowser({
           </div>
         ) : null}
       </section>
+      {activeCategory?.videoPath ? <CategoryVideo src={activeCategory.videoPath} /> : null}
       <AreaSwitch lockedArea={lockedArea} area={area} total={products.length} onSelect={(slug) => update({ area: slug })} />
 
       <div className="catalog-tools">
@@ -258,6 +282,7 @@ export function CatalogBrowser({
                 <SpecularButton tone="ghost" to={`/categories/${group.category.slug}`}>View all</SpecularButton>
               </div>
             ) : null}
+            {area === "all" && group.category.videoPath ? <CategoryVideo src={group.category.videoPath} /> : null}
             {group.items.length === 0 ? (
               <div className="empty">No products are in this category yet.</div>
             ) : (
